@@ -21,8 +21,7 @@ jobs:
           node-version: '22'
           registry-url: 'https://npm.pkg.github.com'
           scope: '@dkfz-unite'
-
-      - run: npm install
+      - run: npm install --ignore-scripts
       - run: node build.js
       - run: npm publish
         env:
