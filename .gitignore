@@ -17,4 +17,4 @@ bower_components/
 *.swp
 
 # Mac metadata
-.DS_Store
+.DS_Storedist/
