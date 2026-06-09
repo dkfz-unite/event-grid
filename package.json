@@ -5,12 +5,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git@github.com:oncojs/oncogrid.git"
+    "url": "git+https://github.com/dkfz-unite/oncogrid.git"
   },
   "devDependencies": {
     "browserify": "^3.46.1",
     "chai": "^3.5.0",
-    "esbuild": "^0.28.0",
     "gulp": "^3.9.1",
     "gulp-browserify": "^0.5.1",
     "gulp-concat": "^2.6.0",
@@ -26,7 +25,6 @@
   },
   "main": "src/OncoGrid.js",
   "module": "src/OncoGrid.js",
-  "browser": "dist/oncogrid.min.js",
   "dependencies": {
     "d3": "3.5.17",
     "eventemitter3": "^2.0.3",
