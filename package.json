@@ -1,7 +1,7 @@
 {
   "name": "@dkfz-unite/oncogrid",
   "description": "OncoGrid Visualization for ICGC",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -23,6 +23,8 @@
     "node": ">=0.8.0"
   },
   "main": "src/OncoGrid.js",
+  "module": "src/OncoGrid.js",
+  "browser": "dist/oncogrid.min.js",
   "dependencies": {
     "d3": "3.5.17",
     "eventemitter3": "^2.0.3",
