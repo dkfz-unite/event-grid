@@ -6,21 +6,19 @@ const { minify } = require('terser');
 
 const entry = path.resolve(__dirname, 'src/OncoGrid.js');
 
-// Debug build
-browserify(entry, { standalone: 'OncoGrid' })
-    .bundle((err, buf) => {
-        if (err) { console.error(err); process.exit(1); }
-        fs.mkdirSync('dist', { recursive: true });
-        fs.writeFileSync('dist/oncogrid-debug.js', buf);
-        console.log('Debug build complete.');
-    });
+fs.mkdirSync('dist', { recursive: true });
 
-// Minified build
 browserify(entry, { standalone: 'OncoGrid' })
     .bundle(async (err, buf) => {
         if (err) { console.error(err); process.exit(1); }
+
+        // Debug build
+        fs.writeFileSync('dist/oncogrid-debug.js', buf);
+        console.log('Debug build complete.');
+
+        // Minified build — only after debug is done
         const result = await minify(buf.toString());
-        fs.mkdirSync('dist', { recursive: true });
+        if (result.error) { console.error(result.error); process.exit(1); }
         fs.writeFileSync('dist/oncogrid.min.js', result.code);
         console.log('Minified build complete.');
     });
