@@ -1,28 +1,22 @@
-const esbuild = require('esbuild');
+// build.js
+const browserify = require('browserify');
+const fs = require('fs');
+const path = require('path');
 
-Promise.all([
-    // Debug build
-    esbuild.build({
-        entryPoints: ['src/OncoGrid.js'],
-        bundle: true,
-        minify: false,
-        outfile: 'dist/oncogrid-debug.js',
-        format: 'iife',
-        globalName: 'OncoGrid',
-        platform: 'browser',
-        define: { 'this': 'window' },   // ← fix: replace this with window
-    }),
-    // Minified build
-    esbuild.build({
-        entryPoints: ['src/OncoGrid.js'],
-        bundle: true,
-        minify: true,
-        outfile: 'dist/oncogrid.min.js',
-        format: 'iife',
-        globalName: 'OncoGrid',
-        platform: 'browser',
-        define: { 'this': 'window' },   // ← fix
-    }),
-]).then(() => {
-    console.log('Build complete.');
-}).catch(() => process.exit(1));
+// Debug build
+browserify('src/OncoGrid.js', { standalone: 'OncoGrid' })
+    .bundle((err, buf) => {
+        if (err) { console.error(err); process.exit(1); }
+        fs.writeFileSync('dist/oncogrid-debug.js', buf);
+        console.log('Debug build complete.');
+    });
+
+// Minified build
+const { minify } = require('terser');
+browserify('src/OncoGrid.js', { standalone: 'OncoGrid' })
+    .bundle(async (err, buf) => {
+        if (err) { console.error(err); process.exit(1); }
+        const result = await minify(buf.toString());
+        fs.writeFileSync('dist/oncogrid.min.js', result.code);
+        console.log('Minified build complete.');
+    });

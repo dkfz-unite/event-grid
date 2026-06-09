@@ -1,13 +1,14 @@
 {
   "name": "@dkfz-unite/oncogrid",
   "description": "OncoGrid Visualization for ICGC",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git@github.com:oncojs/oncogrid.git"
   },
   "devDependencies": {
+    "browserify": "^3.46.1",
     "chai": "^3.5.0",
     "esbuild": "^0.28.0",
     "gulp": "^3.9.1",
@@ -17,7 +18,8 @@
     "gulp-minify": "0.0.10",
     "gulp-rename": "^1.2.2",
     "jshint": "^2.9.2",
-    "mocha": "^2.4.5"
+    "mocha": "^2.4.5",
+    "terser": "^5.48.0"
   },
   "engines": {
     "node": ">=0.8.0"
