@@ -1,7 +1,7 @@
 {
-  "name": "oncogrid",
+  "name": "@dkfz-unite/oncogrid",
   "description": "OncoGrid Visualization for ICGC",
-  "version": "3.0.0",
+  "version": "3.0.2",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "esbuild": "^0.28.0",
     "gulp": "^3.9.1",
     "gulp-browserify": "^0.5.1",
     "gulp-concat": "^2.6.0",
@@ -28,5 +29,16 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.uniq": "^4.5.0",
     "lodash.values": "^4.3.0"
-  }
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "prepublish": "node build.js"
+  },
+  "files": [
+    "src",
+    "dist"
+  ]
 }
