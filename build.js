@@ -8,18 +8,15 @@ const entry = path.resolve(__dirname, 'src/OncoGrid.js');
 
 fs.mkdirSync('dist', { recursive: true });
 
-// Pass entry as explicit file array, disable package.json main resolution
-const b = browserify({ standalone: 'OncoGrid' });
-b.add(entry);
+browserify(entry, { standalone: 'OncoGrid' })
+    .bundle(async (err, buf) => {
+        if (err) { console.error(err); process.exit(1); }
 
-b.bundle(async (err, buf) => {
-    if (err) { console.error(err); process.exit(1); }
+        fs.writeFileSync('dist/oncogrid-debug.js', buf);
+        console.log('Debug build complete.');
 
-    fs.writeFileSync('dist/oncogrid-debug.js', buf);
-    console.log('Debug build complete.');
-
-    const result = await minify(buf.toString());
-    if (result.error) { console.error(result.error); process.exit(1); }
-    fs.writeFileSync('dist/oncogrid.min.js', result.code);
-    console.log('Minified build complete.');
-});
+        const result = await minify(buf.toString());
+        if (result.error) { console.error(result.error); process.exit(1); }
+        fs.writeFileSync('dist/oncogrid.min.js', result.code);
+        console.log('Minified build complete.');
+    });
