@@ -3,8 +3,9 @@ const browserify = require('browserify');
 const fs = require('fs');
 const path = require('path');
 const { minify } = require('terser');
+const entry = path.resolve(__dirname, 'src/index.js');
 
-const entry = path.resolve(__dirname, 'src/OncoGrid.js');
+//const entry = path.resolve(__dirname, 'src/OncoGrid.js');
 
 fs.mkdirSync('dist', { recursive: true });
 
