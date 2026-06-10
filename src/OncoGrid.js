@@ -158,9 +158,10 @@ OncoGrid.prototype.createLookupTable = function () {
       lookupTable[type][donorId] = {};
       lookupTable[type][donorId][geneId] = [obs.ids];
     }
-
-    _self.lookupTable = lookupTable;
   }
+
+  // Always ensure lookupTable is assigned, even with zero observations
+  _self.lookupTable = lookupTable;
 };
 
 /**
