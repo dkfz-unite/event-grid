@@ -1,19 +1,3 @@
-/*
- * Copyright 2016(c) The Ontario Institute for Cancer Research. All rights reserved.
- *
- * This program and the accompanying materials are made available under the terms of the GNU Public
- * License v3.0. You should have received a copy of the GNU General Public License along with this
- * program. If not, see <http://www.gnu.org/licenses/>.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
- * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 'use strict';
 var d3 = require('d3');
 var cloneDeep = require('lodash.clonedeep');
@@ -22,7 +6,7 @@ var values = require('lodash.values');
 var EventEmitter = require('eventemitter3');
 var util = require('util');
 
-var OncoGrid = function(params) {
+var UniteOncoGrid = function(params) {
   var _self = this;
   params.emit = _self.emit.bind(this);
   _self.params = params;
@@ -33,7 +17,7 @@ var OncoGrid = function(params) {
 
   _self.height = _self.inputHeight;
   if (_self.height / params.genes.length < _self.minCellHeight) {
-      _self.height = params.genes.length * _self.minCellHeight;
+    _self.height = params.genes.length * _self.minCellHeight;
   }
 
   _self.prefix = params.prefix || 'og-';
@@ -41,20 +25,17 @@ var OncoGrid = function(params) {
   params.wrapper = '.' + _self.prefix + 'container';
 
   _self.container = d3.select(params.element || 'body')
-    .append('div')
-    .attr('class', _self.prefix + 'container')
-    .style('position', 'relative');
+      .append('div')
+      .attr('class', _self.prefix + 'container')
+      .style('position', 'relative');
 
   _self.initCharts();
   EventEmitter.call(this);
 };
 
-util.inherits(OncoGrid, EventEmitter);
+util.inherits(UniteOncoGrid, EventEmitter);
 
-/**
- * Instantiate charts
- */
-OncoGrid.prototype.initCharts = function(reloading) {
+UniteOncoGrid.prototype.initCharts = function(reloading) {
   var _self = this;
 
   _self.clonedParams = cloneDeep(_self.params);
@@ -95,12 +76,12 @@ OncoGrid.prototype.initCharts = function(reloading) {
   _self.charts.push(_self.mainGrid);
 };
 
-OncoGrid.prototype.calculatePositions = function () {
+UniteOncoGrid.prototype.calculatePositions = function () {
   var _self = this;
 
   var getX = d3.scale.ordinal()
-    .domain(d3.range(_self.donors.length))
-    .rangeBands([0, _self.width]);
+      .domain(d3.range(_self.donors.length))
+      .rangeBands([0, _self.width]);
 
   for (var t = 0, type; t < _self.types.length; t++) {
     type = _self.types[t];
@@ -116,10 +97,9 @@ OncoGrid.prototype.calculatePositions = function () {
     }
   }
 
-
   var getY = d3.scale.ordinal()
-    .domain(d3.range(_self.genes.length))
-    .rangeBands([0, _self.height]);
+      .domain(d3.range(_self.genes.length))
+      .rangeBands([0, _self.height]);
 
   for(var i = 0; i < _self.genes.length; i += 1) {
     _self.genes[i].y = getY(i);
@@ -129,10 +109,7 @@ OncoGrid.prototype.calculatePositions = function () {
   _self.x = getX;
 };
 
-/**
- * Creates a for constant time checks if an observation exists for a given donor, gene coordinate.
- */
-OncoGrid.prototype.createLookupTable = function () {
+UniteOncoGrid.prototype.createLookupTable = function () {
   var _self = this;
   var lookupTable = {};
 
@@ -160,30 +137,22 @@ OncoGrid.prototype.createLookupTable = function () {
     }
   }
 
-  // Always ensure lookupTable is assigned, even with zero observations
   _self.lookupTable = lookupTable;
 };
 
-/**
- * Initializes and creates the main SVG with rows and columns. Does prelim sort on data
- */
-OncoGrid.prototype.render = function() {
+UniteOncoGrid.prototype.render = function() {
   var _self = this;
 
   _self.emit('render:all:start');
   setTimeout(function () {
     _self.charts.forEach(function(chart) {
-        chart.render();
+      chart.render();
     });
-
     _self.emit('render:all:end');
   });
 };
 
-/**
- * Updates all charts
- */
-OncoGrid.prototype.update = function(scope) {
+UniteOncoGrid.prototype.update = function(scope) {
   var _self = scope;
 
   return function(donorSort) {
@@ -202,10 +171,7 @@ OncoGrid.prototype.update = function(scope) {
   };
 };
 
-/**
- * Triggers a resize of OncoGrid to desired width and height.
- */
-OncoGrid.prototype.resize = function(width, height, fullscreen) {
+UniteOncoGrid.prototype.resize = function(width, height, fullscreen) {
   var _self = this;
 
   _self.fullscreen = fullscreen;
@@ -225,25 +191,17 @@ OncoGrid.prototype.resize = function(width, height, fullscreen) {
   });
 };
 
-/**
- * Sorts donors by score
- */
-OncoGrid.prototype.sortByScores = function() {
+UniteOncoGrid.prototype.sortByScores = function() {
   var _self = this;
   _self.donors.sort(_self.sortScore);
 };
 
-OncoGrid.prototype.genesSortbyScores = function() {
+UniteOncoGrid.prototype.genesSortbyScores = function() {
   var _self = this;
-
   _self.genes.sort(_self.sortScore);
 };
 
-/**
- * Sorts genes by scores and recomputes and sorts donors.
- * Clusters towards top left corner of grid.
- */
-OncoGrid.prototype.cluster = function() {
+UniteOncoGrid.prototype.cluster = function() {
   var _self = this;
 
   _self.genesSortbyScores();
@@ -252,12 +210,11 @@ OncoGrid.prototype.cluster = function() {
   _self.update(_self)();
 };
 
-OncoGrid.prototype.removeDonors = function(func) {
+UniteOncoGrid.prototype.removeDonors = function(func) {
   var _self = this;
 
   var removedList = [];
 
-  // Remove donors from data
   for (var i = 0; i < _self.donors.length; i++) {
     var donor = _self.donors[i];
     if (func(donor)) {
@@ -282,16 +239,11 @@ OncoGrid.prototype.removeDonors = function(func) {
   _self.resize(_self.width, _self.height, false);
 };
 
-/**
- * Removes genes and updates OncoGrid rendering.
- * @param func function describing the criteria for removing a gene.
- */
-OncoGrid.prototype.removeGenes = function(func) {
+UniteOncoGrid.prototype.removeGenes = function(func) {
   var _self = this;
 
   var removedList = [];
 
-  // Remove genes from data
   for (var i = 0; i < _self.genes.length; i++) {
     var gene = _self.genes[i];
     if (func(gene)) {
@@ -307,79 +259,54 @@ OncoGrid.prototype.removeGenes = function(func) {
   _self.resize(_self.width, _self.height, false);
 };
 
-/**
- * Sorts donors
- * @param func a comparator function.
- */
-OncoGrid.prototype.sortDonors = function(func) {
+UniteOncoGrid.prototype.sortDonors = function(func) {
   var _self = this;
-
   _self.donors.sort(func);
   _self.update(_self)();
 };
 
-/**
- * Sorts genes
- * @param func a comparator function.
- */
-OncoGrid.prototype.sortGenes= function(func) {
+UniteOncoGrid.prototype.sortGenes = function(func) {
   var _self = this;
-
   _self.computeScores();
   _self.sortByScores();
   _self.genes.sort(func);
   _self.update(_self)();
 };
 
-/**
- * set oncogrid between heatmap mode and regular mode showing individual consequence types.
- */
-OncoGrid.prototype.setHeatmap = function(active) {
+UniteOncoGrid.prototype.setHeatmap = function(active) {
   var _self = this;
-
   _self.heatMapMode = active;
   _self.mainGrid.setHeatmap(active);
 };
 
-/**
- * Toggles oncogrid between heatmap mode and regular mode showing individual consequence types.
- */
-OncoGrid.prototype.toggleHeatmap = function() {
+UniteOncoGrid.prototype.toggleHeatmap = function() {
   var _self = this;
-
   _self.setHeatmap(!_self.heatMapMode);
 };
 
-OncoGrid.prototype.setGridLines = function(active) {
+UniteOncoGrid.prototype.setGridLines = function(active) {
   var _self = this;
-
   _self.drawGridLines = active;
   _self.mainGrid.setGridLines(active);
 };
 
-OncoGrid.prototype.toggleGridLines = function() {
+UniteOncoGrid.prototype.toggleGridLines = function() {
   var _self = this;
-
   _self.setGridLines(!_self.drawGridLines);
 };
 
-OncoGrid.prototype.setCrosshair = function(active) {
+UniteOncoGrid.prototype.setCrosshair = function(active) {
   var _self = this;
-
   _self.crosshairMode = active;
   _self.mainGrid.setCrosshair(active);
 };
 
-OncoGrid.prototype.toggleCrosshair = function() {
+UniteOncoGrid.prototype.toggleCrosshair = function() {
   var _self = this;
-
   _self.setCrosshair(!_self.crosshairMode);
 };
 
-/**
- * Returns 1 if at least one mutation, 0 otherwise.
- */
-OncoGrid.prototype.mutationScore = function(donor, gene) {
+UniteOncoGrid.prototype.mutationScore = function(donor, gene) {
   var _self = this;
   var mutationTable = _self.lookupTable['mutation'] || {};
   if (mutationTable.hasOwnProperty(donor) && mutationTable[donor].hasOwnProperty(gene)) {
@@ -389,10 +316,7 @@ OncoGrid.prototype.mutationScore = function(donor, gene) {
   }
 };
 
-/**
- * Returns # of mutations a gene has as it's score
- */
-OncoGrid.prototype.mutationGeneScore = function(donor, gene) {
+UniteOncoGrid.prototype.mutationGeneScore = function(donor, gene) {
   var _self = this;
   var mutationTable = _self.lookupTable['mutation'] || {};
   if (mutationTable.hasOwnProperty(donor) && mutationTable[donor].hasOwnProperty(gene)) {
@@ -403,10 +327,7 @@ OncoGrid.prototype.mutationGeneScore = function(donor, gene) {
   }
 };
 
-/**
- * Computes scores for donor sorting.
- */
-OncoGrid.prototype.computeScores = function() {
+UniteOncoGrid.prototype.computeScores = function() {
   var _self = this;
 
   for (var i = 0; i < _self.donors.length; i++) {
@@ -417,13 +338,9 @@ OncoGrid.prototype.computeScores = function() {
       donor.score += (_self.mutationScore(donor.id, gene.id) * Math.pow(2, _self.genes.length + 1 - j));
     }
   }
-
 };
 
-/**
- * Computes scores for gene sorting.
- */
-OncoGrid.prototype.computeGeneScoresAndCount = function() {
+UniteOncoGrid.prototype.computeGeneScoresAndCount = function() {
   var _self = this;
 
   for (var i = 0; i < _self.genes.length; i++) {
@@ -437,10 +354,7 @@ OncoGrid.prototype.computeGeneScoresAndCount = function() {
   }
 };
 
-/**
- * Computes the number of observations for a given donor.
- */
-OncoGrid.prototype.computeDonorCounts = function() {
+UniteOncoGrid.prototype.computeDonorCounts = function() {
   var _self = this;
   var mutationTable = _self.lookupTable['mutation'] || {};
   for (var i = 0; i < _self.donors.length; i++) {
@@ -453,30 +367,22 @@ OncoGrid.prototype.computeDonorCounts = function() {
   }
 };
 
-/**
- * Computes the number of observations for a given gene.
- */
-OncoGrid.prototype.computeGeneCounts = function() {
+UniteOncoGrid.prototype.computeGeneCounts = function() {
   var _self = this;
 
   for (var i = 0; i < _self.genes.length; i++) {
     var gene = _self.genes[i];
     gene.count = 0;
-
     for (var j = 0; j < _self.observations.length; j++) {
       var obs = _self.observations[j];
       if (gene.id === obs.geneId) {
-        gene.count+= 1;
+        gene.count += 1;
       }
     }
-
   }
 };
 
-/**
- * Comparator for scores
- */
-OncoGrid.prototype.sortScore = function(a, b) {
+UniteOncoGrid.prototype.sortScore = function(a, b) {
   if (a.score < b.score) {
     return 1;
   } else if (a.score > b.score) {
@@ -486,10 +392,7 @@ OncoGrid.prototype.sortScore = function(a, b) {
   }
 };
 
-/**
- *  Cleanup function to ensure the svg and any bindings are removed from the dom.
- */
-OncoGrid.prototype.destroy = function() {
+UniteOncoGrid.prototype.destroy = function() {
   var _self = this;
 
   _self.charts.forEach(function (chart) {
@@ -498,7 +401,7 @@ OncoGrid.prototype.destroy = function() {
   _self.container.remove();
 };
 
-OncoGrid.prototype.reload = function() {
+UniteOncoGrid.prototype.reload = function() {
   var _self = this;
 
   _self.charts.forEach(function (chart) {
@@ -508,4 +411,4 @@ OncoGrid.prototype.reload = function() {
   _self.render();
 };
 
-module.exports = OncoGrid;
+module.exports = UniteOncoGrid;
