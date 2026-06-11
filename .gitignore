@@ -18,3 +18,4 @@ bower_components/
 
 # Mac metadata
 .DS_Storedist/
+dist/

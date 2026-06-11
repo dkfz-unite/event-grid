@@ -1,3 +1,3 @@
 'use strict';
-window.OncoGrid = require('./OncoGrid');
-module.exports = window.OncoGrid;
+window.UniteOncoGrid = require('./OncoGrid');
+module.exports = window.UniteOncoGrid;
