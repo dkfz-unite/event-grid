@@ -205,7 +205,7 @@ MainGrid.prototype.render = function () {
             if (d.type === 'cnv' || _self.heatMap) {
               return _self.getRectangularPath(d);
             }
-            return _self.getCircularPath(d);
+            return _self.getRectangularPath(d);
         })
         .attr('fill', function (d) {
             return _self.getColor(d);
