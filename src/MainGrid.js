@@ -35,7 +35,8 @@ MainGrid = function (params, lookupTable, updateCallback, resizeCallback, x, y) 
     _self.init();
     // Histograms and tracks.
     _self.donorHistogram = new OncoHistogram(params, _self.container, false);
-    _self.histogramHeight = _self.donorHistogram.totalHeight;
+    //_self.histogramHeight = _self.donorHistogram.totalHeight;
+    _self.histogramHeight = 0;
     _self.cnvDonorHistogram = new OncoHistogram(params, _self.container, false, 'cnv');
 
     _self.donorTrack =
@@ -229,9 +230,9 @@ MainGrid.prototype.render = function () {
     }
 
     if (_self.ssmObservations.length) {
-      _self.emit('render:donorHistogram:start');
+      /*_self.emit('render:donorHistogram:start');
       _self.donorHistogram.render();
-      _self.emit('render:donorHistogram:end');
+      _self.emit('render:donorHistogram:end');*/
 
       _self.emit('render:geneHistogram:start');
       _self.geneHistogram.render();
