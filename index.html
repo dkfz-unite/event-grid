@@ -140,7 +140,7 @@
     }
 
     let rows = generateRows();
-    let columns = generateColumns(100);
+    let columns = generateColumns(1000);
     let observations = generateObservations(columns, rows);
 
     var grid = new UniteOncoGrid({
@@ -150,9 +150,9 @@
         ssmObservations: observations,
         colorMap: {
             mutation: {
-                gain:       '#ff9b6c',
-                loss:       '#57dba4',
-                neutral:    '#af57db'
+                gain:       'red',
+                loss:       'blue',
+                neutral:    'gray'
             }
         },
         width: 800,

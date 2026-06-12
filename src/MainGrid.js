@@ -202,10 +202,11 @@ MainGrid.prototype.render = function () {
             return _self.getValueByType(d);
         })
         .attr('d', function (d) {
-            if (d.type === 'cnv' || _self.heatMap) {
+            /*if (d.type === 'cnv' || _self.heatMap) {
               return _self.getRectangularPath(d);
             }
-            return _self.getCircularPath(d);
+            return _self.getCircularPath(d);*/
+            return _self.getRectangularPath(d);
         })
         .attr('fill', function (d) {
             return _self.getColor(d);
@@ -287,10 +288,11 @@ MainGrid.prototype.update = function (x, y) {
         _self.container.selectAll('.' + _self.prefix + 'sortable-rect-' + _self.types[i])
             .transition()
             .attr('d', function (d) {
-              if (d.type === 'cnv' || _self.heatMap) {
+              /*if (d.type === 'cnv' || _self.heatMap) {
                 return _self.getRectangularPath(d);
               }
-              return _self.getCircularPath(d);
+              return _self.getCircularPath(d);*/
+                return _self.getRectangularPath(d);
             })
     }
 
@@ -704,7 +706,7 @@ MainGrid.prototype.createGeneMap = function () {
  * Function that determines the y position of a mutation within a cell
  */
 MainGrid.prototype.getY = function (d) {
-    var _self = this;
+    /*var _self = this;
 
     var y = _self.geneMap[d.geneId].y;
 
@@ -715,7 +717,10 @@ MainGrid.prototype.getY = function (d) {
       }
       return yPosition;
     }
-    return y;
+    return y;*/
+
+    var _self = this;
+    return _self.geneMap[d.geneId].y;  // always return top of cell, no offset
 };
 
 /**
@@ -765,7 +770,7 @@ MainGrid.prototype.getOpacity = function (d) {
  * @returns {number}
  */
 MainGrid.prototype.getHeight = function (d) {
-    var _self = this;
+    /*var _self = this;
 
     if (typeof d !== 'undefined') {
         if (!_self.heatMap === true && d.type === 'mutation') {
@@ -776,6 +781,13 @@ MainGrid.prototype.getHeight = function (d) {
         } else {
           return _self.cellHeight;
         }
+    } else {
+        return 0;
+    }*/
+
+    var _self = this;
+    if (typeof d !== 'undefined') {
+        return _self.cellHeight;  // always full height
     } else {
         return 0;
     }
@@ -835,10 +847,11 @@ MainGrid.prototype.setHeatmap = function (active) {
       d3.selectAll('.' + _self.prefix + 'sortable-rect-' + _self.types[i])
         .transition()
       .attr('d', function (d) {
-        if (d.type === 'cnv' || _self.heatMap) {
+        /*if (d.type === 'cnv' || _self.heatMap) {
             return _self.getRectangularPath(d);
         }
-        return _self.getCircularPath(d);
+        return _self.getCircularPath(d);*/
+          return _self.getRectangularPath(d);
       })
       .attr('fill', function (d) {
           return _self.getColor(d);
