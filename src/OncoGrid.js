@@ -345,10 +345,10 @@ UniteOncoGrid.prototype.computeGeneScoresAndCount = function() {
 
   for (var i = 0; i < _self.genes.length; i++) {
     var gene = _self.genes[i];
-    gene.score = 0;
+    gene.score = _self.genes.length - i;
     for (var j = 0; j < _self.donors.length; j++) {
       var donor = _self.donors[j];
-      gene.score += _self.mutationGeneScore(donor.id, gene.id);
+      //gene.score += _self.mutationGeneScore(donor.id, gene.id);
     }
     gene.count = gene.score;
   }
