@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OncoGrid Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #oncoGrid { border: 1px solid #ccc; }
+
+        /* OncoGrid styles */
+        .background {
+            fill: transparent;
+        }
+
+        .og-maingrid-svg .background {
+            fill: transparent;
+        }
+
+        /* grid lines */
+        .og-donor-column, .og-gene-row line {
+            stroke: #ddd;
+            stroke-width: 1px;
+        }
+
+        /* histogram axis lines */
+        .og-histogram-axis {
+            stroke: #ccc;
+            stroke-width: 1px;
+        }
+
+        /* label text */
+        .og-label-text-font {
+            font-size: 11px;
+            fill: #333;
+        }
+
+        /* crosshair */
+        .og-vertical-cross, .og-horizontal-cross {
+            stroke: #f00;
+            stroke-width: 1px;
+        }
+    </style>
+</head>
+<body>
+<h2>OncoGrid Test</h2>
+<div id="oncoGrid"></div>
+
+<script src="dist/oncogrid-debug.js"></script>
+<script>
+    var grid = new UniteOncoGrid({
+        element: '#oncoGrid',
+        donors: [
+            { "id": "1", "displayId": "D001" },
+            { "id": "2", "displayId": "D002" }
+        ],
+        genes: [
+            { "id": "3", "symbol": "PRKCZ" },
+            { "id": "185", "symbol": "PER3" }
+        ],
+        ssmObservations: [
+            { "id": "1", "donorId": "1", "geneId": "3", "type": "mutation", "consequence": "missense_variant", "ids": ["1"] },
+            { "id": "625", "donorId": "2", "geneId": "3", "type": "mutation", "consequence": "missense_variant", "ids": ["625"] }
+        ],
+        colorMap: {
+            mutation: {
+                missense_variant:        '#ff9b6c',
+                frameshift_variant:      '#57dba4',
+                stop_gained:             '#af57db',
+                start_lost:              '#ff2323',
+                stop_lost:               '#d3ec00',
+                initiator_codon_variant: '#5abaff',
+                splice_acceptor_variant: '#5abaff'
+            }
+        },
+        width: 800,
+        height: 300,
+        scaleToFit: true
+    });
+
+    grid.render();
+</script>
+</body>
+</html>
