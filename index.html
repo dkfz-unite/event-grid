@@ -47,29 +47,112 @@
 
 <script src="dist/oncogrid-debug.js"></script>
 <script>
+    function generateRows() {
+        return [
+            { "id": "1", "symbol": "chr1p" },
+            { "id": "2", "symbol": "chr1q" },
+            { "id": "3", "symbol": "chr2p" },
+            { "id": "4", "symbol": "chr2q" },
+            { "id": "5", "symbol": "chr3p" },
+            { "id": "6", "symbol": "chr3q" },
+            { "id": "7", "symbol": "chr4p" },
+            { "id": "8", "symbol": "chr4q" },
+            { "id": "9", "symbol": "chr5p" },
+            { "id": "10", "symbol": "chr5q" },
+            { "id": "11", "symbol": "chr6p" },
+            { "id": "12", "symbol": "chr6q" },
+            { "id": "13", "symbol": "chr7p" },
+            { "id": "14", "symbol": "chr7q" },
+            { "id": "15", "symbol": "chr8p" },
+            { "id": "16", "symbol": "chr8q" },
+            { "id": "17", "symbol": "chr9p" },
+            { "id": "18", "symbol": "chr9q" },
+            { "id": "19", "symbol": "chr10p" },
+            { "id": "20", "symbol": "chr10q" },
+            { "id": "21", "symbol": "chr11p" },
+            { "id": "22", "symbol": "chr11q" },
+            { "id": "23", "symbol": "chr12p" },
+            { "id": "24", "symbol": "chr12q" },
+            { "id": "25", "symbol": "chr14p" },
+            { "id": "26", "symbol": "chr14q" },
+            { "id": "27", "symbol": "chr15p" },
+            { "id": "28", "symbol": "chr15q" },
+            { "id": "29", "symbol": "chr16p" },
+            { "id": "30", "symbol": "chr16q" },
+            { "id": "31", "symbol": "chr17p" },
+            { "id": "32", "symbol": "chr17q" },
+            { "id": "33", "symbol": "chr18p" },
+            { "id": "34", "symbol": "chr18q" },
+            { "id": "35", "symbol": "chr19p" },
+            { "id": "36", "symbol": "chr19q" },
+            { "id": "37", "symbol": "chr20p" },
+            { "id": "38", "symbol": "chr20q" },
+            { "id": "39", "symbol": "chr21p" },
+            { "id": "40", "symbol": "chr22q" },
+            { "id": "41", "symbol": "chr23p" },
+            { "id": "42", "symbol": "chr23q" },
+            { "id": "43", "symbol": "chrXp" },
+            { "id": "44", "symbol": "chrXq" },
+            { "id": "45", "symbol": "chrYp" },
+            { "id": "46", "symbol": "chrYq" }
+        ];
+    }
+
+    function generateColumns(count) {
+        let columns = [];
+
+        for(let i = 0; i < count; i++) {
+            let id = (i + 1).toString();
+            columns.push({ "id": id, "displayId": "D00" + id });
+        }
+
+        return columns;
+    };
+
+    function getRandomConsequenceIndex() {
+        var rand = Math.random();
+        if (rand < 0.60) {
+            return 2; // neutral - 60%
+        } else if (rand < 0.80) {
+            return 0; // gain - 20%
+        } else {
+            return 1; // loss - 20%
+        }
+    }
+
+    function generateObservations(columns, rows) {
+        let observations = [];
+        let consequences = [ "gain", "loss", "neutral" ];
+
+
+        for (let i = 0; i < rows.length; i++) {
+            for (let j = 0; j < columns.length; j++) {
+                let consequenceIndex = getRandomConsequenceIndex();
+
+                if(consequenceIndex != 2) {
+                    let id = (i * rows.length + j + 1).toString();
+                    observations.push({ "id": id, "donorId": columns[j].id, "geneId": rows[i].id, "type": "mutation", "consequence": consequences[consequenceIndex], "ids": [id] });
+                }
+            }
+        }
+
+        return observations;
+    }
+
+    let rows = generateRows();
+    let columns = generateColumns(100);
+    let observations = generateObservations(columns, rows);
+
     var grid = new UniteOncoGrid({
         element: '#oncoGrid',
-        donors: [
-            { "id": "1", "displayId": "D001" },
-            { "id": "2", "displayId": "D002" }
-        ],
-        genes: [
-            { "id": "3", "symbol": "PRKCZ" },
-            { "id": "185", "symbol": "PER3" }
-        ],
-        ssmObservations: [
-            { "id": "1", "donorId": "1", "geneId": "3", "type": "mutation", "consequence": "missense_variant", "ids": ["1"] },
-            { "id": "625", "donorId": "2", "geneId": "3", "type": "mutation", "consequence": "missense_variant", "ids": ["625"] }
-        ],
+        donors: columns,
+        genes: rows,
+        ssmObservations: observations,
         colorMap: {
             mutation: {
-                missense_variant:        '#ff9b6c',
-                frameshift_variant:      '#57dba4',
-                stop_gained:             '#af57db',
-                start_lost:              '#ff2323',
-                stop_lost:               '#d3ec00',
-                initiator_codon_variant: '#5abaff',
-                splice_acceptor_variant: '#5abaff'
+                gain:       '#ff9b6c',
+                loss:       '#57dba4',
+                neutral:    '#af57db'
             }
         },
         width: 800,
