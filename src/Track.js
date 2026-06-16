@@ -96,7 +96,8 @@ OncoTrack.prototype.init = function () {
   var _self = this;
   _self.container = _self.svg.append('g');
 
-  var labelHeight = _self.rotated ? 16.5 : 0;
+  //var labelHeight = _self.rotated ? 16.5 : 0;
+  var labelHeight = (_self.rotated && _self.groups.length > 0) ? 16.5 : 0;
   _self.height = 0;
   for (var k = 0; k < _self.groups.length; k++) {
     var g = _self.groups[k];

@@ -36,7 +36,8 @@ MainGrid = function (params, lookupTable, updateCallback, resizeCallback, x, y) 
     // Histograms and tracks.
     _self.donorHistogram = new OncoHistogram(params, _self.container, false);
     //_self.histogramHeight = _self.donorHistogram.totalHeight;
-    _self.histogramHeight = 0;
+    //_self.histogramHeight = 0;
+    _self.histogramHeightDonors = 0 /*_self.donorHistogram.totalHeight*/;
     _self.cnvDonorHistogram = new OncoHistogram(params, _self.container, false, 'cnv');
 
     _self.donorTrack =
@@ -45,9 +46,10 @@ MainGrid = function (params, lookupTable, updateCallback, resizeCallback, x, y) 
     _self.donorTrack.init();
 
     _self.geneHistogram = new OncoHistogram(params, _self.container, true);
+    _self.histogramHeightGenes = /*_self.geneHistogram.totalHeight*/0;
     _self.geneTrack =
         new OncoTrack(params, _self.container, true, params.geneTracks, params.geneOpacityFunc,
-            params.geneFillFunc, updateCallback, _self.width + (_self.histogramHeight * _self.numTypes), _self.resizeCallback, _self.isFullscreen);
+            params.geneFillFunc, updateCallback, _self.width + (_self.histogramHeightGenes * _self.numTypes), _self.resizeCallback, _self.isFullscreen);
     _self.geneTrack.init();
 
     _self.cnvGeneHistogram = new OncoHistogram(params, _self.container, true, 'cnv');
@@ -234,18 +236,18 @@ MainGrid.prototype.render = function () {
       _self.donorHistogram.render();
       _self.emit('render:donorHistogram:end');*/
 
-      _self.emit('render:geneHistogram:start');
+      /*_self.emit('render:geneHistogram:start');
       _self.geneHistogram.render();
-      _self.emit('render:geneHistogram:end');
+      _self.emit('render:geneHistogram:end');*/
     }
 
-    _self.emit('render:donorTrack:start');
+    /*_self.emit('render:donorTrack:start');
     _self.donorTrack.render();
     _self.emit('render:donorTrack:end');
 
     _self.emit('render:geneTrack:start');
     _self.geneTrack.render();
-    _self.emit('render:geneTrack:end');
+    _self.emit('render:geneTrack:end');*/
 
     _self.defineCrosshairBehaviour();
 
@@ -415,16 +417,16 @@ MainGrid.prototype.resize = function (width, height, x, y) {
     }
 
     _self.donorTrack.resize(width, _self.height, _self.height);
-    _self.geneTrack.resize(width, _self.height, _self.width + _self.histogramHeight + 120);
+    _self.geneTrack.resize(width, _self.height, _self.width + _self.histogramHeightGenes + 120);
 
     _self.resizeSvg();
     _self.update(_self.x, _self.x);
 
     _self.verticalCross.attr('y2', _self.height + _self.donorTrack.height);
-    _self.horizontalCross.attr('x2', _self.width + (_self.histogramHeight * _self.numTypes) + _self.geneTrack.height);
+    _self.horizontalCross.attr('x2', _self.width + (_self.histogramHeightGenes * _self.numTypes) + _self.geneTrack.height);
 };
 
-MainGrid.prototype.resizeSvg = function () {
+/*MainGrid.prototype.resizeSvg = function () {
     var _self = this;
     var width = _self.margin.left + _self.leftTextWidth + _self.width + (_self.histogramHeight * _self.numTypes) + _self.geneTrack.height + _self.margin.right;
 
@@ -447,7 +449,63 @@ MainGrid.prototype.resizeSvg = function () {
             (_self.margin.left + _self.leftTextWidth) + ',' +
             (_self.margin.top + (_self.histogramHeight * _self.numTypes)) +
             ')');
-};
+};*/
+
+MainGrid.prototype.resizeSvg = function () {
+        var _self = this;
+
+        console.group('resizeSvg');
+
+        console.group('width components');
+        console.log('margin.left:       ', _self.margin.left);
+        console.log('leftTextWidth:     ', _self.leftTextWidth);
+        console.log('width:             ', _self.width);
+        console.log('histogramHeight:   ', _self.histogramHeightGenes);
+        console.log('numTypes:          ', _self.numTypes);
+        console.log('histogram total:   ', _self.histogramHeightGenes * _self.numTypes);
+        console.log('geneTrack.height:  ', _self.geneTrack.height);
+        console.log('margin.right:      ', _self.margin.right);
+        var width = _self.margin.left + _self.leftTextWidth + _self.width + (_self.histogramHeightGenes * _self.numTypes) + _self.geneTrack.height + _self.margin.right;
+        console.log('TOTAL width:       ', width);
+        console.groupEnd();
+
+        console.group('height components');
+        console.log('margin.top:        ', _self.margin.top);
+        console.log('histogramHeight:   ', _self.histogramHeightDonors);
+        console.log('numTypes:          ', _self.numTypes);
+        console.log('histogram total:   ', _self.histogramHeightDonors * _self.numTypes);
+        console.log('height:            ', _self.height);
+        console.log('donorTrack.height: ', _self.donorTrack.height);
+        console.log('margin.bottom:     ', _self.margin.bottom);
+        var height = _self.margin.top + (_self.histogramHeightDonors * _self.numTypes) + _self.height + _self.donorTrack.height + _self.margin.bottom;
+        console.log('TOTAL height:      ', height);
+        console.groupEnd();
+
+        console.group('container transform');
+        console.log('translate X:       ', _self.margin.left + _self.leftTextWidth);
+        console.log('translate Y:       ', _self.margin.top + (_self.histogramHeightDonors * _self.numTypes));
+        console.groupEnd();
+
+        console.groupEnd();
+
+        _self.canvas
+            .attr('width', width)
+            .attr('height', height);
+
+        if (_self.scaleToFit) {
+            _self.canvas.style('width', '100%');
+            _self.svg.attr('viewBox', '0 0 ' + width + ' ' + height);
+        } else {
+            _self.canvas.style('width', width + 'px');
+            _self.svg.attr('width', width).attr('height', height);
+        }
+
+        _self.container
+            .attr('transform', 'translate(' +
+                (_self.margin.left + _self.leftTextWidth) + ',' +
+                (_self.margin.top + (_self.histogramHeightDonors * _self.numTypes)) +
+                ')');
+    };
 
 MainGrid.prototype.defineCrosshairBehaviour = function () {
     var _self = this;
@@ -482,7 +540,7 @@ MainGrid.prototype.defineCrosshairBehaviour = function () {
 
     _self.verticalCross = _self.container.append('line')
         .attr('class', _self.prefix + 'vertical-cross')
-        .attr('y1', -_self.histogramHeight)
+        .attr('y1', -_self.histogramHeightDonors)
         .attr('y2', _self.height + _self.donorTrack.height)
         .attr('opacity', 0)
         .attr('style', 'pointer-events: none');
@@ -490,7 +548,7 @@ MainGrid.prototype.defineCrosshairBehaviour = function () {
     _self.horizontalCross = _self.container.append('line')
         .attr('class', _self.prefix + 'horizontal-cross')
         .attr('x1', 0)
-        .attr('x2', _self.width + _self.histogramHeight + _self.geneTrack.height)
+        .attr('x2', _self.width + _self.histogramHeightGenes + _self.geneTrack.height)
         .attr('opacity', 0)
         .attr('style', 'pointer-events: none');
 
@@ -728,14 +786,17 @@ MainGrid.prototype.getY = function (d) {
  * Function that determines the x position of a mutation or cnv within a cell
  */
 MainGrid.prototype.getCellX = function (d) {
-  var _self = this;
+  /*var _self = this;
 
   var x = _self.lookupTable[d.type][d.donorId].x;
 
   if (!_self.heatMap && d.type === 'mutation') {
     return x + (_self.cellWidth/4);
   }
-  return x;
+  return x;*/
+
+    var _self = this;
+    return _self.lookupTable[d.type][d.donorId].x;
 };
 
 /**
