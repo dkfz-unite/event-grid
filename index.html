@@ -99,35 +99,40 @@
     }
 
     function generateColumns(count) {
-        let columns = [];
+        let columns = []
+        let types = ["type 1", "type 2", "type 3", "type 4", "type 5", "type 6"];
+        const typeWeights = [0.5, 0.2, 0.1, 0.1, 0.05, 0.5];
 
         for(let i = 0; i < count; i++) {
             let id = (i + 1).toString();
-            columns.push({ "id": id, "displayId": "D00" + id });
+            const typeIndex = getRandomIndex(typeWeights);
+            columns.push({ "id": id, "displayId": "D00" + id, "type": types[typeIndex] });
         }
 
         return columns;
     };
 
-    function getRandomConsequenceIndex() {
-        var rand = Math.random();
-        if (rand < 0.60) {
-            return 2; // neutral - 60%
-        } else if (rand < 0.80) {
-            return 0; // gain - 20%
-        } else {
-            return 1; // loss - 20%
+    function getRandomIndex(weights) {
+        let rand = Math.random();
+        let sum = 0;
+
+        for(let i = 0; i < weights.length; i++) {
+            let weight = weights[i];
+            sum += weight;
+            if(sum >= rand)
+                return i;
         }
     }
 
     function generateObservations(columns, rows) {
         let observations = [];
-        let consequences = [ "gain", "loss", "neutral" ];
+        const consequences = [ "gain", "loss", "neutral" ];
+        const consequenceWeights = [0.2, 0.2, 0.6];
 
 
         for (let i = 0; i < rows.length; i++) {
             for (let j = 0; j < columns.length; j++) {
-                let consequenceIndex = getRandomConsequenceIndex();
+                let consequenceIndex = getRandomIndex(consequenceWeights);
 
                 if(consequenceIndex != 2) {
                     let id = (i * rows.length + j + 1).toString();
@@ -140,8 +145,10 @@
     }
 
     let rows = generateRows();
-    let columns = generateColumns(2);
+    let columns = generateColumns(100);
     let observations = generateObservations(columns, rows);
+
+    debugger;
 
     var grid = new UniteOncoGrid({
         element: '#oncoGrid',
