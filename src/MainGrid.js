@@ -241,11 +241,11 @@ MainGrid.prototype.render = function () {
       _self.emit('render:geneHistogram:end');*/
     }
 
-    /*_self.emit('render:donorTrack:start');
+    _self.emit('render:donorTrack:start');
     _self.donorTrack.render();
     _self.emit('render:donorTrack:end');
 
-    _self.emit('render:geneTrack:start');
+    /*_self.emit('render:geneTrack:start');
     _self.geneTrack.render();
     _self.emit('render:geneTrack:end');*/
 
@@ -300,8 +300,8 @@ MainGrid.prototype.update = function (x, y) {
     }
 
     if (_self.ssmObservations.length) {
-      _self.donorHistogram.update(_self.donors);
-      _self.geneHistogram.update(_self.genes);
+      /*_self.donorHistogram.update(_self.donors);
+      _self.geneHistogram.update(_self.genes);*/
     }
 
     if (_self.cnvObservations.length) {

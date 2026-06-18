@@ -39,6 +39,10 @@
             stroke: #f00;
             stroke-width: 1px;
         }
+
+        .og-track-data {
+            shape-rendering: crispEdges;
+        }
     </style>
 </head>
 <body>
@@ -101,12 +105,12 @@
     function generateColumns(count) {
         let columns = []
         let types = ["type 1", "type 2", "type 3", "type 4", "type 5", "type 6"];
-        const typeWeights = [0.5, 0.2, 0.1, 0.1, 0.05, 0.5];
+        const typeWeights = [0.5, 0.2, 0.1, 0.1, 0.05, 0.05];
 
         for(let i = 0; i < count; i++) {
             let id = (i + 1).toString();
             const typeIndex = getRandomIndex(typeWeights);
-            columns.push({ "id": id, "displayId": "D00" + id, "type": types[typeIndex] });
+            columns.push({ "id": id, "displayId": "D00" + id, "type": types[typeIndex], typeWeight: typeWeights[typeIndex] });
         }
 
         return columns;
@@ -144,17 +148,44 @@
         return observations;
     }
 
-    let rows = generateRows();
-    let columns = generateColumns(100);
-    let observations = generateObservations(columns, rows);
+    function sortTypes(field) {
+        return function (a, b) {
+            // primary sort: by weight descending (higher weight = more to the left)
+            let weightDiff = b.typeWeight - a.typeWeight;
+            if (weightDiff !== 0) return weightDiff;
 
-    debugger;
+            // secondary sort: by type name for stable grouping within same weight
+            let typeA = a[field];
+            let typeB = b[field];
+            if (typeA < typeB) return -1;
+            if (typeA > typeB) return 1;
+            return 0;
+        }
+    }
+
+    function generateTracks() {
+        return [
+            {
+                group: "Types",
+                name: "Type",
+                fieldName: "type",
+                type: "type",
+                sort: sortTypes
+            }
+        ];
+    }
+
+    let rows = generateRows();
+    let columns = generateColumns(1000);
+    let observations = generateObservations(columns, rows);
+    let tracks = generateTracks();
 
     var grid = new UniteOncoGrid({
         element: '#oncoGrid',
         donors: columns,
         genes: rows,
         ssmObservations: observations,
+        donorTracks: tracks,
         colorMap: {
             mutation: {
                 gain:       'red',
@@ -162,6 +193,18 @@
                 neutral:    'gray'
             }
         },
+        donorFillFunc: function(d) {
+            const colors = {
+                'type 1': '#e41a1c',
+                'type 2': '#377eb8',
+                'type 3': '#4daf4a',
+                'type 4': '#984ea3',
+                'type 5': '#ff7f00',
+                'type 6': '#a65628'
+            };
+            return colors[d.value] || '#ccc';
+        },
+        donorOpacityFunc: function(d) { return 1; },
         width: 800,
         height: 300,
         scaleToFit: true
