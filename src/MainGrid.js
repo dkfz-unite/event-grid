@@ -19,6 +19,7 @@ var d3 = require('d3');
 
 var OncoHistogram = require('./Histogram');
 var OncoTrack = require('./Track');
+var RowsSummaryChart = require("./RowsSummaryChart");
 
 var MainGrid;
 
@@ -53,6 +54,8 @@ MainGrid = function (params, lookupTable, updateCallback, resizeCallback, x, y) 
     _self.geneTrack.init();
 
     _self.cnvGeneHistogram = new OncoHistogram(params, _self.container, true, 'cnv');
+
+    _self.rowSummaryChart = new RowsSummaryChart(params, _self.container, 'mutation', params.ssmObservations, _self.lookupTable);
 };
 
 /**
@@ -248,6 +251,8 @@ MainGrid.prototype.render = function () {
     /*_self.emit('render:geneTrack:start');
     _self.geneTrack.render();
     _self.emit('render:geneTrack:end');*/
+
+    _self.rowSummaryChart.render();
 
     _self.defineCrosshairBehaviour();
 

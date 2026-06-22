@@ -176,7 +176,7 @@
     }
 
     let rows = generateRows();
-    let columns = generateColumns(1000);
+    let columns = generateColumns(100);
     let observations = generateObservations(columns, rows);
     let tracks = generateTracks();
 
@@ -186,6 +186,7 @@
         genes: rows,
         ssmObservations: observations,
         donorTracks: tracks,
+        accountableConsequences: ["gain", "loss"],
         colorMap: {
             mutation: {
                 gain:       'red',
