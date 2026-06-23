@@ -176,7 +176,7 @@
     }
 
     let rows = generateRows();
-    let columns = generateColumns(100);
+    let columns = generateColumns(1000);
     let observations = generateObservations(columns, rows);
     let tracks = generateTracks();
 
@@ -208,7 +208,13 @@
         donorOpacityFunc: function(d) { return 1; },
         width: 800,
         height: 300,
-        scaleToFit: true
+        scaleToFit: true,
+        margin: {
+            left: 40,
+            top: 30,
+            right: 100,
+            bottom: 15
+        }
     });
 
     grid.render();

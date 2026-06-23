@@ -118,7 +118,7 @@ var RowsSummaryChart = function (params, svgElement, type, observations, lookupT
     _self.width = params.width || 500;
     _self.height = params.height || 500;
 
-    _self.histogramWidth = 100;  // width of the bar chart area in pixels
+    _self.histogramWidth = 40;  // width of the bar chart area in pixels
     _self.barHeight = _self.height / _self.domain.length;
 
     _self.totalWidth = _self.histogramWidth + _self.lineWidthOffset + _self.padding;
@@ -150,6 +150,9 @@ RowsSummaryChart.prototype.render = function () {
     // container sits to the right of the grid at x = _self.width
     _self.container = _self.svg.append('g')
         .attr('class', _self.prefix + 'rows-summary-chart');
+
+    console.log("_self.width: ", _self.width);
+    console.log("_self.lineWidthOffset: ", _self.lineWidthOffset);
 
     _self.chart = _self.container.append('g')
         .attr('transform', 'translate(' + (_self.width + _self.lineWidthOffset) + ',0)');

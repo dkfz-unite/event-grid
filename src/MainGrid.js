@@ -316,6 +316,8 @@ MainGrid.prototype.update = function (x, y) {
 
     _self.donorTrack.update(_self.donors);
     _self.geneTrack.update(_self.genes);
+
+    _self.rowSummaryChart.update(_self.genes);
 };
 
 
@@ -465,7 +467,7 @@ MainGrid.prototype.resizeSvg = function () {
         console.log('margin.left:       ', _self.margin.left);
         console.log('leftTextWidth:     ', _self.leftTextWidth);
         console.log('width:             ', _self.width);
-        console.log('histogramHeight:   ', _self.histogramHeightGenes);
+        console.log('histogramHeightGenes:   ', _self.histogramHeightGenes);
         console.log('numTypes:          ', _self.numTypes);
         console.log('histogram total:   ', _self.histogramHeightGenes * _self.numTypes);
         console.log('geneTrack.height:  ', _self.geneTrack.height);
@@ -476,7 +478,7 @@ MainGrid.prototype.resizeSvg = function () {
 
         console.group('height components');
         console.log('margin.top:        ', _self.margin.top);
-        console.log('histogramHeight:   ', _self.histogramHeightDonors);
+        console.log('histogramHeightDonors:   ', _self.histogramHeightDonors);
         console.log('numTypes:          ', _self.numTypes);
         console.log('histogram total:   ', _self.histogramHeightDonors * _self.numTypes);
         console.log('height:            ', _self.height);
