@@ -425,6 +425,7 @@ MainGrid.prototype.resize = function (width, height, x, y) {
 
     _self.donorTrack.resize(width, _self.height, _self.height);
     _self.geneTrack.resize(width, _self.height, _self.width + _self.histogramHeightGenes + 120);
+    _self.rowSummaryChart.resize(width, _self.height);
 
     _self.resizeSvg();
     _self.update(_self.x, _self.x);

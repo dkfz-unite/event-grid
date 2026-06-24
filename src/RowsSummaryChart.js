@@ -76,7 +76,7 @@ function drawBars(_self, stats) {
 
             _self.chart.append('rect')
                 .attr('class', _self.prefix + 'summary-bar ' + _self.prefix + row.id + '-summary-bar')
-                .attr('x', 0)                   // all start from left baseline
+                .attr('x', _self.lineHeightOffset)                   // all start from left baseline
                 .attr('y', yPos)
                 .attr('width', barWidth)
                 .attr('height', _self.barHeight - (_self.barHeight < 3 ? 0 : 1))
@@ -236,7 +236,7 @@ RowsSummaryChart.prototype.updateAxis = function (topCount) {
     // top count label at right end of axis
     _self.topText
         .attr('x', _self.histogramWidth + 2)
-        .attr('y', _self.height + _self.lineHeightOffset)
+        .attr('y', _self.height + _self.lineHeightOffset + 10)  // 10px below axis
         .text(topCount);
 
     // half count label
