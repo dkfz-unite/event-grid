@@ -54,7 +54,7 @@
     function generateRows() {
         return [
             { "id": "1", "symbol": "chr1p" },
-            { "id": "2", "symbol": "chr1q" }/*,
+            { "id": "2", "symbol": "chr1q" },
             { "id": "3", "symbol": "chr2p" },
             { "id": "4", "symbol": "chr2q" },
             { "id": "5", "symbol": "chr3p" },
@@ -98,7 +98,7 @@
             { "id": "43", "symbol": "chrXp" },
             { "id": "44", "symbol": "chrXq" },
             { "id": "45", "symbol": "chrYp" },
-            { "id": "46", "symbol": "chrYq" }*/
+            { "id": "46", "symbol": "chrYq" }
         ];
     }
 
@@ -176,7 +176,7 @@
     }
 
     let rows = generateRows();
-    let columns = generateColumns(2);
+    let columns = generateColumns(1000);
     let observations = generateObservations(columns, rows);
     let tracks = generateTracks();
 

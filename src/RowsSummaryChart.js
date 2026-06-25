@@ -41,49 +41,47 @@ function getRowsObservationStats(type, accountableConsequences, rows, observatio
 }
 
 function drawBars(_self, stats) {
-    console.log('stats sample:');
-    stats.slice(0, 3).forEach(function(s) {
-        console.log('  row:', s.row.symbol, 'y:', s.row.y,
-            'consequences:', JSON.stringify(
-                _self.accountableConsequences.reduce(function(acc, c) {
-                    acc[c] = s[c]; return acc;
-                }, {})
-            ));
-    });
-
     var consequenceColors = _self.consequenceColors || {};
 
     for (var i = 0; i < stats.length; i++) {
         var stat = stats[i];
         var row = stat.row;
-        var yPos = row.y;  // vertical position in grid
+        var yPos = row.y;
 
-        // collect consequences with counts, sort descending so longest is drawn first (underneath)
-        var segments = [];
+        // calculate total count for this row across all consequences
+        var totalCount = 0;
+        for (var c = 0; c < _self.accountableConsequences.length; c++) {
+            totalCount += stat[_self.accountableConsequences[c]];
+        }
+
+        if (totalCount === 0) continue;
+
+        // scale total width to histogramWidth based on topCount
+        var totalBarWidth = (_self.histogramWidth * totalCount) / _self.topCount;
+
+        var xOffset = _self.lineHeightOffset;
+
         for (var c = 0; c < _self.accountableConsequences.length; c++) {
             var consequence = _self.accountableConsequences[c];
             var count = stat[consequence];
-            if (count > 0) {
-                segments.push({ consequence: consequence, count: count });
-            }
-        }
-        segments.sort(function(a, b) { return b.count - a.count; });  // longest first = drawn underneath
 
-        // all bars start from x=0 (left baseline), overlapping
-        for (var s = 0; s < segments.length; s++) {
-            var segment = segments[s];
-            var barWidth = (_self.histogramWidth * segment.count) / _self.topCount;
+            if (count === 0) continue;
+
+            // each segment is a proportion of the total bar width
+            var barWidth = (totalBarWidth * count) / totalCount;
 
             _self.chart.append('rect')
                 .attr('class', _self.prefix + 'summary-bar ' + _self.prefix + row.id + '-summary-bar')
-                .attr('x', _self.lineHeightOffset)                   // all start from left baseline
+                .attr('x', xOffset)
                 .attr('y', yPos)
                 .attr('width', barWidth)
                 .attr('height', _self.barHeight - (_self.barHeight < 3 ? 0 : 1))
-                .attr('fill', consequenceColors[segment.consequence] || '#ccc')
+                .attr('fill', consequenceColors[consequence] || '#ccc')
                 .attr('data-row-id', row.id)
-                .attr('data-consequence', segment.consequence)
-                .attr('data-count', segment.count);
+                .attr('data-consequence', consequence)
+                .attr('data-count', count);
+
+            xOffset += barWidth;
         }
     }
 }
@@ -141,9 +139,13 @@ RowsSummaryChart.prototype.render = function () {
     var topCount = 1;
     for (var i = 0; i < stats.length; i++) {
         var stat = stats[i];
+        let statTotal = 0;
         for (var c = 0; c < _self.accountableConsequences.length; c++) {
-            topCount = Math.max(topCount, stat[_self.accountableConsequences[c]]);
+            let consequence = _self.accountableConsequences[c];
+            statTotal += stat[consequence];
         }
+
+        topCount = Math.max(topCount, statTotal);
     }
     _self.topCount = topCount;
 
