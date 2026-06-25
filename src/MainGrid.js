@@ -431,7 +431,7 @@ MainGrid.prototype.resize = function (width, height, x, y) {
     _self.update(_self.x, _self.x);
 
     _self.verticalCross.attr('y2', _self.height + _self.donorTrack.height);
-    _self.horizontalCross.attr('x2', _self.width + (_self.histogramHeightGenes * _self.numTypes) + _self.geneTrack.height);
+    _self.horizontalCross.attr('x2', _self.width + (_self.histogramHeightGenes * _self.numTypes) + _self.geneTrack.height + _self.rowSummaryChart.totalWidth);
 };
 
 /*MainGrid.prototype.resizeSvg = function () {
@@ -556,7 +556,7 @@ MainGrid.prototype.defineCrosshairBehaviour = function () {
     _self.horizontalCross = _self.container.append('line')
         .attr('class', _self.prefix + 'horizontal-cross')
         .attr('x1', 0)
-        .attr('x2', _self.width + _self.histogramHeightGenes + _self.geneTrack.height)
+        .attr('x2', _self.width + _self.histogramHeightGenes + _self.geneTrack.height + _self.rowSummaryChart.totalWidth)
         .attr('opacity', 0)
         .attr('style', 'pointer-events: none');
 
