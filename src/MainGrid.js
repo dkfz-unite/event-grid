@@ -561,7 +561,7 @@ MainGrid.prototype.defineCrosshairBehaviour = function () {
         .attr('style', 'pointer-events: none');
 
     _self.container
-        .on('mousedown', function () { _self.startSelection(this); })
+        //.on('mousedown', function () { _self.startSelection(this); })
         .on('mouseover', function () { moveCrossHair('mouseover', this); })
         .on('mousemove', function () { moveCrossHair('mousemove', this); })
         .on('mouseout', function () {
@@ -571,7 +571,8 @@ MainGrid.prototype.defineCrosshairBehaviour = function () {
                 _self.emit('gridCrosshairMouseOut');
             }
         })
-        .on('mouseup', function () { _self.finishSelection(); });
+        //.on('mouseup', function () { _self.finishSelection(); })
+    ;
 };
 
 /**
