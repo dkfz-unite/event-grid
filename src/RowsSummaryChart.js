@@ -153,9 +153,6 @@ RowsSummaryChart.prototype.render = function () {
     _self.container = _self.svg.append('g')
         .attr('class', _self.prefix + 'rows-summary-chart');
 
-    console.log("_self.width: ", _self.width);
-    console.log("_self.lineWidthOffset: ", _self.lineWidthOffset);
-
     _self.chart = _self.container.append('g')
         .attr('transform', 'translate(' + (_self.width + _self.lineWidthOffset) + ',0)');
 

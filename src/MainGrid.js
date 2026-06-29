@@ -461,40 +461,8 @@ MainGrid.prototype.resize = function (width, height, x, y) {
 
 MainGrid.prototype.resizeSvg = function () {
         var _self = this;
-
-        console.group('resizeSvg');
-
-        console.group('width components');
-        console.log('margin.left:       ', _self.margin.left);
-        console.log('leftTextWidth:     ', _self.leftTextWidth);
-        console.log('width:             ', _self.width);
-        console.log('histogramHeightGenes:   ', _self.histogramHeightGenes);
-        console.log('numTypes:          ', _self.numTypes);
-        console.log('histogram total:   ', _self.histogramHeightGenes * _self.numTypes);
-        console.log('geneTrack.height:  ', _self.geneTrack.height);
-        console.log('margin.right:      ', _self.margin.right);
         var width = _self.margin.left + _self.leftTextWidth + _self.width + (_self.histogramHeightGenes * _self.numTypes) + _self.geneTrack.height + _self.margin.right;
-        console.log('TOTAL width:       ', width);
-        console.groupEnd();
-
-        console.group('height components');
-        console.log('margin.top:        ', _self.margin.top);
-        console.log('histogramHeightDonors:   ', _self.histogramHeightDonors);
-        console.log('numTypes:          ', _self.numTypes);
-        console.log('histogram total:   ', _self.histogramHeightDonors * _self.numTypes);
-        console.log('height:            ', _self.height);
-        console.log('donorTrack.height: ', _self.donorTrack.height);
-        console.log('margin.bottom:     ', _self.margin.bottom);
         var height = _self.margin.top + (_self.histogramHeightDonors * _self.numTypes) + _self.height + _self.donorTrack.height + _self.margin.bottom;
-        console.log('TOTAL height:      ', height);
-        console.groupEnd();
-
-        console.group('container transform');
-        console.log('translate X:       ', _self.margin.left + _self.leftTextWidth);
-        console.log('translate Y:       ', _self.margin.top + (_self.histogramHeightDonors * _self.numTypes));
-        console.groupEnd();
-
-        console.groupEnd();
 
         _self.canvas
             .attr('width', width)
