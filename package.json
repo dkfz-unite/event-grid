@@ -1,46 +1,60 @@
 {
   "name": "@dkfz-unite/oncogrid",
-  "description": "OncoGrid Visualization for ICGC",
-  "version": "3.1.6",
-  "license": "MIT",
+  "description": "Generic column, row, and typed-event matrix visualization",
+  "version": "4.0.0",
+  "license": "Apache-2.0",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dkfz-unite/oncogrid.git"
   },
   "devDependencies": {
-    "browserify": "^3.46.1",
     "chai": "^3.5.0",
-    "gulp": "^3.9.1",
-    "gulp-browserify": "^0.5.1",
-    "gulp-concat": "^2.6.0",
-    "gulp-jshint": "^2.0.0",
-    "gulp-minify": "0.0.10",
-    "gulp-rename": "^1.2.2",
-    "jshint": "^2.9.2",
-    "mocha": "^2.4.5",
-    "terser": "^5.48.0"
-  },
-  "engines": {
-    "node": ">=0.8.0"
-  },
-  "main": "src/index.js",
-  "module": "src/OncoGrid.js",
-  "dependencies": {
     "d3": "3.5.17",
-    "eventemitter3": "^2.0.3",
     "lodash.clonedeep": "^4.5.0",
-    "lodash.uniq": "^4.5.0",
-    "lodash.values": "^4.3.0"
+    "magic-string": "^1.1.0",
+    "mocha": "^11.3.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.1"
+  },
+  "main": "./dist/oncogrid.cjs",
+  "module": "./dist/oncogrid.js",
+  "types": "./dist/index.d.ts",
+  "style": "./dist/oncogrid.css",
+  "unpkg": "./dist/oncogrid.umd.js",
+  "jsdelivr": "./dist/oncogrid.umd.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/oncogrid.js",
+      "require": "./dist/oncogrid.cjs",
+      "default": "./dist/oncogrid.js"
+    },
+    "./style.css": "./dist/oncogrid.css",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "overrides": {
+    "serialize-javascript": "7.0.7"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "node build.js",
-    "prepublishOnly": "node build.js"
+    "dev": "vite --host 127.0.0.1 --port 8877",
+    "typecheck": "tsc --noEmit",
+    "test:types": "tsc -p tsconfig.types.json",
+    "build": "npm run typecheck && vite build && tsc -p tsconfig.build.json",
+    "preview": "vite preview --host 127.0.0.1 --port 8877",
+    "pack:check": "npm pack --dry-run --cache .npm-cache",
+    "prepublishOnly": "npm run build"
   },
   "files": [
-    "src",
-    "dist"
+    "dist",
+    "docs",
+    "README.md",
+    "LICENSE.txt"
   ]
 }

@@ -6,76 +6,8 @@
     cursor: crosshair;
 }
 
-#grid-div .background {
-    fill: #fff;
-    stroke: black;
-    stroke-width: 0.5;
-}
-
-#grid-div line {
-    stroke: grey;
-    stroke-opacity: .5;
-    shape-rendering: crispEdges;
-
-}
-
-#grid-div line .og-vertical-cross{
-    stroke: black;
-    stroke-opacity: 1;
-    stroke-width: 2;
-    shape-rendering: crispEdges;
-
-}
-
-#grid-div line .og-horizontal-cross{
-    stroke: black;
-    stroke-opacity: 1;
-    stroke-width: 2;
-    shape-rendering: crispEdges;
-
-}
-
-#grid-div .og-histogram-axis {
-    stroke: #000;
-    stroke-opacity: 0.5;
-    shape-rendering: crispEdges;
-}
-    
 #grid-div textarea {
     padding: 2px;
     width: 714px;
     height: 360px;
-}
-    
-#grid-div .og-gene-label {
-    cursor: move;
-}
-
-#grid-div .og-remove-gene:before {
-    content: 'Remove';
-}
-
-#grid-div .og-remove-gene {
-    cursor: pointer;
-    font-size: 0.7rem;
-    font-family: sans-serif;
-    color: red;
-}
-
-#grid-div .og-label-text-font {
-    font-size: 0.5rem;
-}
-
-#grid-div .og-track-group-label {
-    font-size: 0.8em;
-}
-
-#grid-div .og-sortable-rect:hover {
-    stroke: red;
-    stroke-width: 3;
-}
-
-#grid-div .og-highlight {
-    stroke: green;
-    stroke-width: 1;
 }

@@ -1,225 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>OncoGrid Test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OncoGrid sample playground</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        #oncoGrid { border: 1px solid #ccc; }
-
-        /* OncoGrid styles */
-        .background {
-            fill: transparent;
-        }
-
-        .og-maingrid-svg .background {
-            fill: transparent;
-        }
-
-        /* grid lines */
-        .og-donor-column, .og-gene-row line {
-            stroke: #ddd;
-            stroke-width: 1px;
-        }
-
-        /* histogram axis lines */
-        .og-histogram-axis {
-            stroke: #ccc;
-            stroke-width: 1px;
-        }
-
-        /* label text */
-        .og-label-text-font {
-            font-size: 11px;
-            fill: #333;
-        }
-
-        /* crosshair */
-        .og-vertical-cross, .og-horizontal-cross {
-            stroke: #f00;
-            stroke-width: 1px;
-        }
-
-        .og-track-data {
-            shape-rendering: crispEdges;
-        }
+        :root { color-scheme: light; font-family: Inter, system-ui, sans-serif; }
+        body { margin: 0; background: #f6f7f9; color: #1f2933; }
+        main { width: min(1440px, calc(100% - 32px)); margin: 24px auto 48px; }
+        h1 { margin: 0 0 6px; font-size: 1.6rem; }
+        .intro { margin: 0 0 16px; color: #52606d; }
+        .panel { background: #fff; border: 1px solid #d9e2ec; border-radius: 10px; padding: 16px; }
+        .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        button { border: 1px solid #bcccdc; border-radius: 6px; background: #fff; padding: 7px 11px; cursor: pointer; }
+        button:hover { background: #f0f4f8; }
+        #stats { margin: 0 0 10px; font-size: 0.9rem; color: #52606d; }
+        .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; font-size: 0.85rem; }
+        .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; background: var(--color); }
+        #grid { width: 100%; overflow: hidden; }
+        #details { margin: 14px 0 0; min-height: 54px; padding: 10px; border-radius: 6px; background: #f5f7fa; white-space: pre-wrap; font: 0.78rem/1.45 ui-monospace, monospace; }
     </style>
 </head>
 <body>
-<h2>OncoGrid Test</h2>
-<div id="oncoGrid"></div>
+<main>
+    <h1>OncoGrid sample playground</h1>
+    <p class="intro">A deterministic 15 × 30 dataset with empty cells and cells containing multiple event types.</p>
 
-<script src="dist/oncogrid-debug.js"></script>
-<script>
-    function generateRows() {
-        return [
-            { "id": "1", "symbol": "chr1p" },
-            { "id": "2", "symbol": "chr1q" },
-            { "id": "3", "symbol": "chr2p" },
-            { "id": "4", "symbol": "chr2q" },
-            { "id": "5", "symbol": "chr3p" },
-            { "id": "6", "symbol": "chr3q" },
-            { "id": "7", "symbol": "chr4p" },
-            { "id": "8", "symbol": "chr4q" },
-            { "id": "9", "symbol": "chr5p" },
-            { "id": "10", "symbol": "chr5q" },
-            { "id": "11", "symbol": "chr6p" },
-            { "id": "12", "symbol": "chr6q" },
-            { "id": "13", "symbol": "chr7p" },
-            { "id": "14", "symbol": "chr7q" },
-            { "id": "15", "symbol": "chr8p" },
-            { "id": "16", "symbol": "chr8q" },
-            { "id": "17", "symbol": "chr9p" },
-            { "id": "18", "symbol": "chr9q" },
-            { "id": "19", "symbol": "chr10p" },
-            { "id": "20", "symbol": "chr10q" },
-            { "id": "21", "symbol": "chr11p" },
-            { "id": "22", "symbol": "chr11q" },
-            { "id": "23", "symbol": "chr12p" },
-            { "id": "24", "symbol": "chr12q" },
-            { "id": "25", "symbol": "chr14p" },
-            { "id": "26", "symbol": "chr14q" },
-            { "id": "27", "symbol": "chr15p" },
-            { "id": "28", "symbol": "chr15q" },
-            { "id": "29", "symbol": "chr16p" },
-            { "id": "30", "symbol": "chr16q" },
-            { "id": "31", "symbol": "chr17p" },
-            { "id": "32", "symbol": "chr17q" },
-            { "id": "33", "symbol": "chr18p" },
-            { "id": "34", "symbol": "chr18q" },
-            { "id": "35", "symbol": "chr19p" },
-            { "id": "36", "symbol": "chr19q" },
-            { "id": "37", "symbol": "chr20p" },
-            { "id": "38", "symbol": "chr20q" },
-            { "id": "39", "symbol": "chr21p" },
-            { "id": "40", "symbol": "chr22q" },
-            { "id": "41", "symbol": "chr23p" },
-            { "id": "42", "symbol": "chr23q" },
-            { "id": "43", "symbol": "chrXp" },
-            { "id": "44", "symbol": "chrXq" },
-            { "id": "45", "symbol": "chrYp" },
-            { "id": "46", "symbol": "chrYq" }
-        ];
-    }
+    <section class="panel">
+        <div class="toolbar">
+            <button id="toggle-grid" type="button">Toggle grid lines</button>
+            <button id="toggle-crosshair" type="button">Toggle crosshair</button>
+            <button id="toggle-heatmap" type="button">Toggle heat map</button>
+            <button id="cluster" type="button">Cluster</button>
+            <button id="reset" type="button">Reset</button>
+        </div>
+        <p id="stats"></p>
+        <div id="legend" class="legend"></div>
+        <div id="grid"></div>
+        <pre id="details">Hover over or click an event cell to inspect its generic payload.</pre>
+    </section>
+</main>
 
-    function generateColumns(count) {
-        let columns = []
-        let types = ["type 1", "type 2", "type 3", "type 4", "type 5", "type 6"];
-        const typeWeights = [0.5, 0.2, 0.1, 0.1, 0.05, 0.05];
-
-        for(let i = 0; i < count; i++) {
-            let id = (i + 1).toString();
-            const typeIndex = getRandomIndex(typeWeights);
-            columns.push({ "id": id, "displayId": "D00" + id, "type": types[typeIndex], typeWeight: typeWeights[typeIndex] });
-        }
-
-        return columns;
-    };
-
-    function getRandomIndex(weights) {
-        let rand = Math.random();
-        let sum = 0;
-
-        for(let i = 0; i < weights.length; i++) {
-            let weight = weights[i];
-            sum += weight;
-            if(sum >= rand)
-                return i;
-        }
-    }
-
-    function generateObservations(columns, rows) {
-        let observations = [];
-        const consequences = [ "gain", "loss", "neutral" ];
-        const consequenceWeights = [0.2, 0.2, 0.6];
-
-
-        for (let i = 0; i < rows.length; i++) {
-            for (let j = 0; j < columns.length; j++) {
-                let consequenceIndex = getRandomIndex(consequenceWeights);
-
-                if(consequenceIndex != 2) {
-                    let id = (i * rows.length + j + 1).toString();
-                    observations.push({ "id": id, "donorId": columns[j].id, "geneId": rows[i].id, "type": "mutation", "consequence": consequences[consequenceIndex], "ids": [id] });
-                }
-            }
-        }
-
-        return observations;
-    }
-
-    function sortTypes(field) {
-        return function (a, b) {
-            // primary sort: by weight descending (higher weight = more to the left)
-            let weightDiff = b.typeWeight - a.typeWeight;
-            if (weightDiff !== 0) return weightDiff;
-
-            // secondary sort: by type name for stable grouping within same weight
-            let typeA = a[field];
-            let typeB = b[field];
-            if (typeA < typeB) return -1;
-            if (typeA > typeB) return 1;
-            return 0;
-        }
-    }
-
-    function generateTracks() {
-        return [
-            {
-                group: "Types",
-                name: "Type",
-                fieldName: "type",
-                type: "type",
-                sort: sortTypes
-            }
-        ];
-    }
-
-    let rows = generateRows();
-    let columns = generateColumns(1000);
-    let observations = generateObservations(columns, rows);
-    let tracks = generateTracks();
-
-    var grid = new UniteOncoGrid({
-        element: '#oncoGrid',
-        donors: columns,
-        genes: rows,
-        ssmObservations: observations,
-        donorTracks: tracks,
-        accountableConsequences: ["gain", "loss"],
-        colorMap: {
-            mutation: {
-                gain:       'red',
-                loss:       'blue',
-                neutral:    'gray'
-            }
-        },
-        donorFillFunc: function(d) {
-            const colors = {
-                'type 1': '#e41a1c',
-                'type 2': '#377eb8',
-                'type 3': '#4daf4a',
-                'type 4': '#984ea3',
-                'type 5': '#ff7f00',
-                'type 6': '#a65628'
-            };
-            return colors[d.value] || '#ccc';
-        },
-        donorOpacityFunc: function(d) { return 1; },
-        width: 800,
-        height: 300,
-        scaleToFit: true,
-        margin: {
-            left: 40,
-            top: 30,
-            right: 100,
-            bottom: 15
-        }
-    });
-
-    grid.setCrosshair(true);
-
-    grid.render();
-</script>
+<script src="test/data/sample-data.js"></script>
+<script type="module" src="/test/playground.ts"></script>
 </body>
 </html>

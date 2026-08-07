@@ -2,14 +2,14 @@
 <head>
     <meta charset="utf-8">
     <title>Test Page</title>
+    <link href="../../dist/oncogrid.css" rel="stylesheet" />
     <link href="index.css" rel="stylesheet" />
-    <script src="../../bower_components/d3/d3.min.js"></script>
-    <script src="../../dist/oncogrid-debug.js"></script>
+    <script src="../../dist/oncogrid.umd.js"></script>
 </head>
 
 <body>
     <div id="grid-div"></div>
-    <button onclick="removeCleanDonors()">Remove Clean Donors</button>
+    <button onclick="removeEmptyColumns()">Remove Empty Columns</button>
     <button onclick="toggleGridLines()">Grid</button>
     <button onclick="toggleCrosshair()">Crosshair Mode</button>
     <input type="text" size="5" id="width-resize"/>
