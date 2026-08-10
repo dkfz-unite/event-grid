@@ -76,4 +76,4 @@ The default export namespace includes:
 - `Cell`, `ColumnHistogram`, and `RowHistogram`;
 - `Track`, `TrackItem`, and `TrackEvent`.
 
-The library source is strict TypeScript. D3 v3 remains behind an internal compatibility type boundary and is bundled into the published builds.
+The library source is strict TypeScript. D3 v7 and its type definitions are used internally and bundled into the published builds.

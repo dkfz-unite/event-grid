@@ -9,8 +9,6 @@ import {
 } from './internal-types';
 import { EVENT_GRID_EVENTS } from './event-names';
 
-import d3 from 'd3';
-
 function getColumnEventStats(
   eventTypes: string[],
   columns: PositionedColumn[],
@@ -99,8 +97,8 @@ class ColumnHistogram {
 
   private bindInteractions(): void {
     this.histogram
-      .on('mouseover', () => {
-        const target = d3.event.target as HTMLElement;
+      .on('mouseover', (domEvent: MouseEvent) => {
+        const target = domEvent.target as HTMLElement;
         const index = target.dataset && target.dataset.itemIndex;
         if (typeof index === 'undefined' || !this.items[Number(index)]) return;
         const payload = this.payloadFor(target, Number(index));
@@ -109,8 +107,8 @@ class ColumnHistogram {
       .on('mouseout', () => {
         this.emit(EVENT_GRID_EVENTS.columnHistogramMouseOut, { axis: 'column' });
       })
-      .on('click', () => {
-        const target = d3.event.target as HTMLElement;
+      .on('click', (domEvent: MouseEvent) => {
+        const target = domEvent.target as HTMLElement;
         const index = target.dataset && target.dataset.itemIndex;
         if (typeof index === 'undefined' || !this.items[Number(index)]) return;
         const payload = this.payloadFor(target, Number(index));

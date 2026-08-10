@@ -26,6 +26,18 @@ function fixture(element) {
   });
 }
 
+function mouse(target, type, clientX, clientY, buttons) {
+  target.dispatchEvent(new MouseEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    view: window,
+    clientX: clientX,
+    clientY: clientY,
+    button: 0,
+    buttons: buttons
+  }));
+}
+
 describe('EventGrid generic interface', function () {
   it('accepts an empty configuration', function () {
     var grid = new EventGrid({ element: '#test1' });
@@ -232,5 +244,59 @@ describe('EventGrid generic interface', function () {
     expect(grid.colorMap.beta).to.equal('#abcdef');
     expect(grid.colorMap.gamma).to.equal('#111111');
     grid.destroy();
+  });
+
+  it('maps pointer coordinates to the crosshair cell', function () {
+    var grid = fixture('#test10');
+    var detail;
+    grid.addEventListener(EventGrid.eventNames.gridCrosshairMouseOver, function (event) {
+      detail = event.detail;
+    });
+    grid.render();
+    grid.setCrosshair(true);
+
+    var eventCell = document.querySelector('#test10 .eg-event[data-column-id="c1"][data-row-id="r1"]');
+    var bounds = eventCell.getBoundingClientRect();
+    mouse(eventCell, 'mousemove', bounds.left + bounds.width / 2, bounds.top + bounds.height / 2, 0);
+
+    expect(detail.column.id).to.equal('c1');
+    expect(detail.row.id).to.equal('r1');
+    expect(document.querySelector('#test10 .eg-vertical-cross').getAttribute('opacity')).to.equal('1');
+    expect(document.querySelector('#test10 .eg-horizontal-cross').getAttribute('opacity')).to.equal('1');
+    grid.destroy();
+  });
+
+  it('reorders rows with the modern D3 drag behavior', function (done) {
+    var grid = new EventGrid({
+      element: '#test10',
+      columns: [{ id: 'c1' }],
+      rows: [{ id: 'r1' }, { id: 'r2' }, { id: 'r3' }],
+      events: [],
+      width: 300,
+      height: 300
+    });
+    grid.render();
+
+    var labels = document.querySelectorAll('#test10 .eg-row-label');
+    var start = labels[0].getBoundingClientRect();
+    var gridBounds = document.querySelector('#test10 .eg-background').getBoundingClientRect();
+    var clientX = start.left + start.width / 2;
+    var startY = start.top + start.height / 2;
+    var destinationY = gridBounds.bottom - 1;
+
+    mouse(labels[0], 'mousedown', clientX, startY, 1);
+    mouse(window, 'mousemove', clientX, destinationY, 1);
+    mouse(window, 'mouseup', clientX, destinationY, 0);
+
+    setTimeout(function () {
+      try {
+        expect(grid.rows.map(function (row) { return row.id; })).to.deep.equal(['r2', 'r3', 'r1']);
+        grid.destroy();
+        done();
+      } catch (error) {
+        grid.destroy();
+        done(error);
+      }
+    }, 0);
   });
 });

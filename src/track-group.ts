@@ -1,4 +1,4 @@
-import d3 from 'd3';
+import * as d3 from 'd3';
 import { EVENT_GRID_EVENTS } from './event-names';
 import {
   D3Scale,
@@ -47,7 +47,7 @@ class TrackGroup {
   background: D3Selection;
   column: D3Selection;
   row: D3Selection;
-  y: D3Scale;
+  y!: D3Scale;
 
   constructor(
     params: TrackGroupOptions,
@@ -203,7 +203,7 @@ class TrackGroup {
   }
 
   computeCoordinates(): void {
-    this.y = d3.scale.ordinal().domain(d3.range(this.length)).rangeBands([0, this.height]);
+    this.y = d3.scaleBand<number>().domain(d3.range(this.length)).range([0, this.height]);
     if (this.column) this.column.remove();
 
     if (this.drawGridLines) {
@@ -225,13 +225,13 @@ class TrackGroup {
       .enter()
       .append('g')
       .attr('class', `${this.prefix}row`)
-      .attr('transform', (_track: InternalTrack, index: number) => `translate(0,${this.y(index)})`);
+      .attr('transform', (_track: InternalTrack, index: number) => `translate(0,${this.y(index) ?? 0})`);
 
     if (this.drawGridLines) this.row.append('line').style('pointer-events', 'none').attr('x2', this.width);
     const labels = this.row.append('text');
     labels
       .attr('class', `${this.prefix}track-label ${this.prefix}label-text-font`)
-      .on('click', (track: InternalTrack) => {
+      .on('click', (_domEvent: MouseEvent, track: InternalTrack) => {
         if (!track.sort) return;
         this.domain.sort(track.sort(track.fieldName));
         this.updateCallback(false);
@@ -260,7 +260,8 @@ class TrackGroup {
         .text('-')
         .attr('y', this.cellHeight / 2)
         .attr('dy', '.32em')
-        .on('click', (_track: InternalTrack, index: number) => this.removeTrack(index))
+        .on('click', (_domEvent: MouseEvent, track: InternalTrack) =>
+          this.removeTrack(this.tracks.indexOf(track)))
         .attr('x', function (this: SVGTextElement, track: InternalTrack) {
           return -(textLengths[track.name] + 12 + this.getComputedTextLength());
         });
@@ -283,7 +284,7 @@ class TrackGroup {
           }));
       }
       addButton.attr('y', this.cellHeight / 2 +
-        (this.length ? this.cellHeight + this.y(this.length - 1) : 0));
+        (this.length ? this.cellHeight + (this.y(this.length - 1) ?? 0) : 0));
     } else {
       addButton.remove();
     }
@@ -297,16 +298,16 @@ class TrackGroup {
 
   renderData(): void {
     const selection = this.container.selectAll(`.${this.prefix}track-data`).data(this.trackData);
-    selection.enter().append('rect');
+    const merged = selection.enter().append('rect').merge(selection);
 
     const yIndexLookup: Record<string, number> = {};
     this.tracks.forEach((track, index) => { yIndexLookup[track.fieldName] = index; });
     this.bindDataInteractions();
 
-    selection
+    merged
       .attr('data-track-data-index', (_data: TrackData, index: number) => index)
       .attr('x', (data: TrackData) => this.itemPosition(this.domain[data.domainIndex]))
-      .attr('y', (data: TrackData) => this.y(yIndexLookup[data.fieldName]))
+      .attr('y', (data: TrackData) => this.y(yIndexLookup[data.fieldName]) ?? 0)
       .attr('width', this.cellWidth)
       .attr('height', this.cellHeight)
       .attr('fill', this.fillFunc)
@@ -318,8 +319,8 @@ class TrackGroup {
 
   private bindDataInteractions(): void {
     this.container
-      .on('click', () => this.emitTrackInteraction('Click'))
-      .on('mouseover', () => this.emitTrackInteraction('MouseOver'))
+      .on('click', (domEvent: MouseEvent) => this.emitTrackInteraction(domEvent, 'Click'))
+      .on('mouseover', (domEvent: MouseEvent) => this.emitTrackInteraction(domEvent, 'MouseOver'))
       .on('mouseout', () => {
         const axis = this.rotated ? 'row' : 'column';
         const axisEvent = axis === 'column'
@@ -329,8 +330,8 @@ class TrackGroup {
       });
   }
 
-  private emitTrackInteraction(suffix: 'Click' | 'MouseOver'): void {
-    const target = d3.event.target as HTMLElement;
+  private emitTrackInteraction(domEvent: MouseEvent, suffix: 'Click' | 'MouseOver'): void {
+    const target = domEvent.target as HTMLElement;
     const index = target.dataset && target.dataset.trackDataIndex;
     const item = typeof index === 'undefined' ? undefined : this.trackData[Number(index)];
     if (!item) return;

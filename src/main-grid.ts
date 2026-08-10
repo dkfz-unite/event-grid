@@ -1,4 +1,4 @@
-import d3 from 'd3';
+import * as d3 from 'd3';
 import ColumnHistogram from './column-histogram';
 import RowHistogram from './row-histogram';
 import Track from './track';
@@ -184,14 +184,14 @@ class MainGrid {
 
   private bindGridInteractions(): void {
     this.svg
-      .on('mouseover', () => {
+      .on('mouseover', (domEvent: MouseEvent) => {
         if (this.crosshair) return;
-        const event = this.eventFromTarget(d3.event.target as HTMLElement);
+        const event = this.eventFromTarget(domEvent.target as HTMLElement);
         if (event) this.emit(EVENT_GRID_EVENTS.gridMouseOver, this.cellPayload(event.columnId, event.rowId));
       })
       .on('mouseout', () => this.emit(EVENT_GRID_EVENTS.gridMouseOut))
-      .on('click', () => {
-        const event = this.eventFromTarget(d3.event.target as HTMLElement);
+      .on('click', (domEvent: MouseEvent) => {
+        const event = this.eventFromTarget(domEvent.target as HTMLElement);
         if (event) this.emit(EVENT_GRID_EVENTS.gridClick, this.cellPayload(event.columnId, event.rowId));
       });
   }
@@ -223,8 +223,8 @@ class MainGrid {
       .data(renderableEvents, (event: PositionedEvent, index: number) =>
         typeof event.id === 'undefined' ? index : event.id);
 
-    selection.enter().append('path');
-    selection
+    const merged = selection.enter().append('path').merge(selection);
+    merged
       .attr('data-event-index', (event: PositionedEvent) => this.events.indexOf(event))
       .attr('data-column-id', (event: PositionedEvent) => event.columnId)
       .attr('data-row-id', (event: PositionedEvent) => event.rowId)
@@ -338,9 +338,9 @@ class MainGrid {
 
   private defineCrosshairBehaviour(): void {
     if (this.verticalCross) return;
-    const moveCrosshair = (target: Element): void => {
+    const moveCrosshair = (domEvent: MouseEvent, target: Element): void => {
       if (!this.crosshair) return;
-      const coordinates = d3.mouse(target);
+      const coordinates = d3.pointer(domEvent, target);
       this.verticalCross.attr('x1', coordinates[0]).attr('x2', coordinates[0]).attr('opacity', 1);
       this.horizontalCross.attr('y1', coordinates[1]).attr('y2', coordinates[1]).attr('opacity', 1);
       const xIndex = coordinates[0] > this.width ? -1 : this.rangeToDomain(this.x, coordinates[0]);
@@ -367,8 +367,8 @@ class MainGrid {
 
     const grid = this;
     this.container
-      .on('mouseover', function (this: Element) { moveCrosshair(this); })
-      .on('mousemove', function (this: Element) { moveCrosshair(this); })
+      .on('mouseover', function (this: Element, domEvent: MouseEvent) { moveCrosshair(domEvent, this); })
+      .on('mousemove', function (this: Element, domEvent: MouseEvent) { moveCrosshair(domEvent, this); })
       .on('mouseout', () => {
         if (!grid.crosshair) return;
         grid.verticalCross.attr('opacity', 0);
@@ -379,17 +379,14 @@ class MainGrid {
 
   private defineRowDragBehaviour(): void {
     const grid = this;
-    const drag = d3.behavior.drag();
-    drag.on('dragstart', () => d3.event.sourceEvent.stopPropagation());
-    drag.on('drag', function (this: Element) {
-      const selection = d3.select(this);
-      selection.attr('transform', () => {
-        const transform = d3.transform(selection.attr('transform'));
-        return `translate(0,${parseInt(transform.translate[1], 10) + d3.event.dy})`;
-      });
+    const drag = d3.drag<SVGGElement, PositionedRow>();
+    drag.on('start', (dragEvent) => dragEvent.sourceEvent.stopPropagation());
+    drag.on('drag', function (this: SVGGElement, dragEvent) {
+      d3.select(this).attr('transform', `translate(0,${dragEvent.y})`);
     });
-    drag.on('dragend', (row: PositionedRow) => {
-      const yIndex = grid.rangeToDomain(grid.y, d3.mouse(grid.container.node())[1]);
+    drag.on('end', (dragEvent, row) => {
+      const coordinates = d3.pointer(dragEvent.sourceEvent, grid.container.node() as Element);
+      const yIndex = grid.rangeToDomain(grid.y, coordinates[1]);
       const dragged = grid.rows.indexOf(row);
       if (dragged < 0 || yIndex < 0) return;
       grid.rows.splice(dragged, 1);
@@ -468,7 +465,11 @@ class MainGrid {
 
   rangeToDomain(scale: D3Scale, value: number): number {
     if (!scale || !scale.domain().length) return -1;
-    return scale.domain()[Math.max(0, d3.bisect(scale.range(), value) - 1)];
+    const domain = scale.domain();
+    const [start, end] = scale.range();
+    const distance = end >= start ? value - start : start - value;
+    const index = Math.floor(distance / scale.step());
+    return domain[Math.min(domain.length - 1, Math.max(0, index))];
   }
 
   destroy(): void {

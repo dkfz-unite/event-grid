@@ -9,8 +9,6 @@ import {
 } from './internal-types';
 import { EVENT_GRID_EVENTS } from './event-names';
 
-import d3 from 'd3';
-
 function getRowEventStats(
   eventTypes: string[],
   rows: PositionedRow[],
@@ -96,16 +94,16 @@ class RowHistogram {
 
   private bindInteractions(): void {
     this.chart
-      .on('mouseover', () => {
-        const target = d3.event.target as HTMLElement;
+      .on('mouseover', (domEvent: MouseEvent) => {
+        const target = domEvent.target as HTMLElement;
         if (!target.dataset || !target.dataset.rowId) return;
         this.emit(EVENT_GRID_EVENTS.rowHistogramMouseOver, this.payloadFor(target));
       })
       .on('mouseout', () => {
         this.emit(EVENT_GRID_EVENTS.rowHistogramMouseOut, { axis: 'row' });
       })
-      .on('click', () => {
-        const target = d3.event.target as HTMLElement;
+      .on('click', (domEvent: MouseEvent) => {
+        const target = domEvent.target as HTMLElement;
         if (!target.dataset || !target.dataset.rowId) return;
         this.emit(EVENT_GRID_EVENTS.rowHistogramClick, this.payloadFor(target));
       });

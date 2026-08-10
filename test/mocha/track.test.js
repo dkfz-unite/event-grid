@@ -61,4 +61,31 @@ describe('Tracks', function () {
     expect(rowClick.item.fieldName).to.equal('priority');
     grid.destroy();
   });
+
+  it('sorts an axis through a track-label listener', function () {
+    var grid = new EventGrid({
+      element: '#test6',
+      columns: [
+        { id: 'c1', owner: 'Blake' },
+        { id: 'c2', owner: 'Avery' }
+      ],
+      rows: [{ id: 'r1' }],
+      events: [],
+      columnTracks: [{
+        name: 'Owner',
+        fieldName: 'owner',
+        sort: function (fieldName) {
+          return function (first, second) {
+            return String(first[fieldName]).localeCompare(String(second[fieldName]));
+          };
+        }
+      }]
+    });
+    grid.render();
+
+    dispatch(document.querySelector('#test6 .eg-track-label'), 'click');
+
+    expect(grid.columns.map(function (column) { return column.id; })).to.deep.equal(['c2', 'c1']);
+    grid.destroy();
+  });
 });

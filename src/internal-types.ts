@@ -7,9 +7,10 @@ import {
   TrackItemPayload
 } from './types';
 import { EventGridEventName } from './event-names';
+import type { ScaleBand } from 'd3';
 
 export type D3Selection = any;
-export type D3Scale = any;
+export type D3Scale = ScaleBand<number>;
 export type Emit = (eventName: EventGridEventName, payload?: unknown) => boolean;
 export type UpdateCallback = (sortColumns?: boolean) => void;
 export type ResizeCallback = () => void;

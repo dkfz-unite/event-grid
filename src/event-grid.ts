@@ -1,5 +1,5 @@
 import cloneDeep from 'lodash.clonedeep';
-import d3 from 'd3';
+import * as d3 from 'd3';
 import MainGrid from './main-grid';
 import defaultColorPalette from './default-color-palette';
 import { EVENT_GRID_EVENTS } from './event-names';
@@ -65,8 +65,8 @@ class EventGrid<
   colorPalette: string[] = [];
   colorMap: Record<string, string> = {};
   lookupTable: EventLookup = {};
-  x: D3Scale;
-  y: D3Scale;
+  x!: D3Scale;
+  y!: D3Scale;
   mainGrid!: MainGrid;
   heatMapMode = false;
   drawGridLines = false;
@@ -83,7 +83,9 @@ class EventGrid<
       this.height = rows.length * this.minCellHeight;
     }
     this.prefix = params.prefix || 'eg-';
-    this.container = d3.select(params.element || 'body')
+    const target = params.element || 'body';
+    const targetSelection: D3Selection = typeof target === 'string' ? d3.select(target) : d3.select(target);
+    this.container = targetSelection
       .append('div')
       .attr('class', `${this.prefix}container`)
       .style('position', 'relative');
@@ -147,13 +149,13 @@ class EventGrid<
   }
 
   private calculatePositions(): void {
-    const getX = d3.scale.ordinal().domain(d3.range(this.columns.length)).rangeBands([0, this.width]);
-    const getY = d3.scale.ordinal().domain(d3.range(this.rows.length)).rangeBands([0, this.height]);
+    const getX = d3.scaleBand<number>().domain(d3.range(this.columns.length)).range([0, this.width]);
+    const getY = d3.scaleBand<number>().domain(d3.range(this.rows.length)).range([0, this.height]);
     this.columns.forEach((column, index) => {
-      column.x = getX(index);
+      column.x = getX(index) ?? 0;
     });
     this.rows.forEach((row, index) => {
-      row.y = getY(index);
+      row.y = getY(index) ?? 0;
     });
     this.x = getX;
     this.y = getY;
