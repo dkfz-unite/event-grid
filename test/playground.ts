@@ -1,18 +1,18 @@
-import OncoGrid from '../src';
-import '../src/oncogrid.css';
+import EventGrid from '../src';
+import '../src/event-grid.css';
 
-interface SampleColumn extends OncoGrid.Item {
+interface SampleColumn extends EventGrid.Item {
   owner: string;
   group: string;
   capacity: number;
 }
 
-interface SampleRow extends OncoGrid.Item {
+interface SampleRow extends EventGrid.Item {
   category: string;
   priority: number;
 }
 
-interface SampleEvent extends OncoGrid.Event {
+interface SampleEvent extends EventGrid.Event {
   score: number;
   note?: string;
 }
@@ -25,11 +25,11 @@ interface SampleData {
 
 declare global {
   interface Window {
-    OncoGridSampleData: SampleData;
+    EventGridSampleData: SampleData;
   }
 }
 
-const sample = window.OncoGridSampleData;
+const sample = window.EventGridSampleData;
 
 function element<TElement extends HTMLElement>(id: string): TElement {
   const found = document.getElementById(id);
@@ -47,7 +47,7 @@ function sortText(field: string) {
     String(a[field]).localeCompare(String(b[field]));
 }
 
-function trackFill(data: OncoGrid.TrackItem): string {
+function trackFill(data: EventGrid.TrackItem): string {
   if (data.fieldName === 'capacity') {
     const value = Number(data.value);
     return value >= 75 ? '#2e7d32' : value >= 55 ? '#66bb6a' : '#c8e6c9';
@@ -58,7 +58,7 @@ function trackFill(data: OncoGrid.TrackItem): string {
   return '#b3e5fc';
 }
 
-const grid = new OncoGrid<SampleColumn, SampleRow, SampleEvent>({
+const grid = new EventGrid<SampleColumn, SampleRow, SampleEvent>({
   element: '#grid',
   columns: sample.columns,
   rows: sample.rows,
@@ -103,7 +103,7 @@ element('stats').textContent =
   ` occupied cells · ${totalCells - occupiedCells} empty cells · ` +
   `${multiEventCells} multi-event cells`;
 
-function showPayload(event: CustomEvent<OncoGrid.Cell<SampleColumn, SampleRow, SampleEvent>>) {
+function showPayload(event: CustomEvent<EventGrid.Cell<SampleColumn, SampleRow, SampleEvent>>) {
   const payload = event.detail;
   element('details').textContent = JSON.stringify({
     column: { id: payload.column.id, label: payload.column.label },
@@ -112,13 +112,13 @@ function showPayload(event: CustomEvent<OncoGrid.Cell<SampleColumn, SampleRow, S
   }, null, 2);
 }
 
-grid.addEventListener(OncoGrid.eventNames.gridMouseOver, showPayload);
-grid.addEventListener(OncoGrid.eventNames.gridClick, showPayload);
-grid.addEventListener(OncoGrid.eventNames.gridCrosshairMouseOver, showPayload);
+grid.addEventListener(EventGrid.eventNames.gridMouseOver, showPayload);
+grid.addEventListener(EventGrid.eventNames.gridClick, showPayload);
+grid.addEventListener(EventGrid.eventNames.gridCrosshairMouseOver, showPayload);
 element<HTMLButtonElement>('toggle-grid').onclick = () => grid.toggleGridLines();
 element<HTMLButtonElement>('toggle-crosshair').onclick = () => grid.toggleCrosshair();
 element<HTMLButtonElement>('toggle-heatmap').onclick = () => grid.toggleHeatmap();
 element<HTMLButtonElement>('cluster').onclick = () => grid.cluster();
-element<HTMLButtonElement>('reset').onclick = () => window.location.reload();
+element<HTMLButtonElement>('reset').onclick = () => grid.reload();
 
 grid.render();

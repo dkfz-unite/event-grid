@@ -1,4 +1,4 @@
-import { ONCOGRID_EVENTS } from './event-names';
+import { EVENT_GRID_EVENTS } from './event-names';
 
 export type GridId = string | number;
 export type Axis = 'column' | 'row';
@@ -69,7 +69,7 @@ export interface RowHistogramPayload<TRow extends GridItem = GridItem> {
   count: number;
 }
 
-export interface OncoGridOptions<
+export interface EventGridOptions<
   TColumn extends GridItem = GridItem,
   TRow extends GridItem = GridItem,
   TEvent extends GridEvent = GridEvent
@@ -78,6 +78,7 @@ export interface OncoGridOptions<
   columns?: TColumn[];
   rows?: TRow[];
   events?: TEvent[];
+  sortByFrequency?: boolean;
   width?: number;
   height?: number;
   minCellHeight?: number;
@@ -107,44 +108,44 @@ export interface OncoGridOptions<
   nullSentinel?: unknown;
 }
 
-export interface OncoGridEventMap<
+export interface EventGridEventMap<
   TColumn extends GridItem = GridItem,
   TRow extends GridItem = GridItem,
   TEvent extends GridEvent = GridEvent
 > {
-  [ONCOGRID_EVENTS.gridClick]: CellPayload<TColumn, TRow, TEvent>;
-  [ONCOGRID_EVENTS.gridMouseOver]: CellPayload<TColumn, TRow, TEvent>;
-  [ONCOGRID_EVENTS.gridMouseOut]: void;
-  [ONCOGRID_EVENTS.gridCrosshairMouseOver]: CellPayload<TColumn, TRow, TEvent>;
-  [ONCOGRID_EVENTS.gridCrosshairMouseOut]: void;
-  [ONCOGRID_EVENTS.columnHistogramClick]: ColumnHistogramPayload<TColumn>;
-  [ONCOGRID_EVENTS.columnHistogramMouseOver]: ColumnHistogramPayload<TColumn>;
-  [ONCOGRID_EVENTS.columnHistogramMouseOut]: { axis: 'column' };
-  [ONCOGRID_EVENTS.rowHistogramClick]: RowHistogramPayload<TRow>;
-  [ONCOGRID_EVENTS.rowHistogramMouseOver]: RowHistogramPayload<TRow>;
-  [ONCOGRID_EVENTS.rowHistogramMouseOut]: { axis: 'row' };
-  [ONCOGRID_EVENTS.columnTrackClick]: TrackPayload<'column'>;
-  [ONCOGRID_EVENTS.columnTrackMouseOver]: TrackPayload<'column'>;
-  [ONCOGRID_EVENTS.columnTrackMouseOut]: { axis: 'column' };
-  [ONCOGRID_EVENTS.rowTrackClick]: TrackPayload<'row'>;
-  [ONCOGRID_EVENTS.rowTrackMouseOver]: TrackPayload<'row'>;
-  [ONCOGRID_EVENTS.rowTrackMouseOut]: { axis: 'row' };
-  [ONCOGRID_EVENTS.trackLegendMouseOver]: { group: string };
-  [ONCOGRID_EVENTS.trackLegendMouseOut]: void;
-  [ONCOGRID_EVENTS.addTrackClick]: {
+  [EVENT_GRID_EVENTS.gridClick]: CellPayload<TColumn, TRow, TEvent>;
+  [EVENT_GRID_EVENTS.gridMouseOver]: CellPayload<TColumn, TRow, TEvent>;
+  [EVENT_GRID_EVENTS.gridMouseOut]: void;
+  [EVENT_GRID_EVENTS.gridCrosshairMouseOver]: CellPayload<TColumn, TRow, TEvent>;
+  [EVENT_GRID_EVENTS.gridCrosshairMouseOut]: void;
+  [EVENT_GRID_EVENTS.columnHistogramClick]: ColumnHistogramPayload<TColumn>;
+  [EVENT_GRID_EVENTS.columnHistogramMouseOver]: ColumnHistogramPayload<TColumn>;
+  [EVENT_GRID_EVENTS.columnHistogramMouseOut]: { axis: 'column' };
+  [EVENT_GRID_EVENTS.rowHistogramClick]: RowHistogramPayload<TRow>;
+  [EVENT_GRID_EVENTS.rowHistogramMouseOver]: RowHistogramPayload<TRow>;
+  [EVENT_GRID_EVENTS.rowHistogramMouseOut]: { axis: 'row' };
+  [EVENT_GRID_EVENTS.columnTrackClick]: TrackPayload<'column'>;
+  [EVENT_GRID_EVENTS.columnTrackMouseOver]: TrackPayload<'column'>;
+  [EVENT_GRID_EVENTS.columnTrackMouseOut]: { axis: 'column' };
+  [EVENT_GRID_EVENTS.rowTrackClick]: TrackPayload<'row'>;
+  [EVENT_GRID_EVENTS.rowTrackMouseOver]: TrackPayload<'row'>;
+  [EVENT_GRID_EVENTS.rowTrackMouseOut]: { axis: 'row' };
+  [EVENT_GRID_EVENTS.trackLegendMouseOver]: { group: string };
+  [EVENT_GRID_EVENTS.trackLegendMouseOut]: void;
+  [EVENT_GRID_EVENTS.addTrackClick]: {
     hiddenTracks: Array<TrackDefinition<TColumn | TRow>>;
     addTrack: (track: TrackDefinition<TColumn | TRow>) => void;
   };
-  [ONCOGRID_EVENTS.renderAllStart]: void;
-  [ONCOGRID_EVENTS.renderAllEnd]: void;
-  [ONCOGRID_EVENTS.renderMainGridStart]: void;
-  [ONCOGRID_EVENTS.renderMainGridEnd]: void;
-  [ONCOGRID_EVENTS.renderColumnHistogramStart]: void;
-  [ONCOGRID_EVENTS.renderColumnHistogramEnd]: void;
-  [ONCOGRID_EVENTS.renderRowHistogramStart]: void;
-  [ONCOGRID_EVENTS.renderRowHistogramEnd]: void;
-  [ONCOGRID_EVENTS.renderColumnTrackStart]: void;
-  [ONCOGRID_EVENTS.renderColumnTrackEnd]: void;
-  [ONCOGRID_EVENTS.renderRowTrackStart]: void;
-  [ONCOGRID_EVENTS.renderRowTrackEnd]: void;
+  [EVENT_GRID_EVENTS.renderAllStart]: void;
+  [EVENT_GRID_EVENTS.renderAllEnd]: void;
+  [EVENT_GRID_EVENTS.renderMainGridStart]: void;
+  [EVENT_GRID_EVENTS.renderMainGridEnd]: void;
+  [EVENT_GRID_EVENTS.renderColumnHistogramStart]: void;
+  [EVENT_GRID_EVENTS.renderColumnHistogramEnd]: void;
+  [EVENT_GRID_EVENTS.renderRowHistogramStart]: void;
+  [EVENT_GRID_EVENTS.renderRowHistogramEnd]: void;
+  [EVENT_GRID_EVENTS.renderColumnTrackStart]: void;
+  [EVENT_GRID_EVENTS.renderColumnTrackEnd]: void;
+  [EVENT_GRID_EVENTS.renderRowTrackStart]: void;
+  [EVENT_GRID_EVENTS.renderRowTrackEnd]: void;
 }

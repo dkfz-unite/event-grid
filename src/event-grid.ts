@@ -2,8 +2,8 @@ import cloneDeep from 'lodash.clonedeep';
 import d3 from 'd3';
 import MainGrid from './main-grid';
 import defaultColorPalette from './default-color-palette';
-import { ONCOGRID_EVENTS } from './event-names';
-import { GridEvent, GridId, GridItem, OncoGridEventMap, OncoGridOptions } from './types';
+import { EVENT_GRID_EVENTS } from './event-names';
+import { GridEvent, GridId, GridItem, EventGridEventMap, EventGridOptions } from './types';
 import {
   D3Scale,
   D3Selection,
@@ -43,15 +43,15 @@ function eventColorMap(
   return colorMap;
 }
 
-class OncoGrid<
+class EventGrid<
   TColumn extends GridItem = GridItem,
   TRow extends GridItem = GridItem,
   TEvent extends GridEvent = GridEvent
 > extends EventTarget {
   static defaultColorPalette: string[] = defaultColorPalette.slice();
-  static readonly eventNames = ONCOGRID_EVENTS;
+  static readonly eventNames = EVENT_GRID_EVENTS;
 
-  readonly params: OncoGridOptions<TColumn, TRow, TEvent>;
+  readonly params: EventGridOptions<TColumn, TRow, TEvent>;
   readonly minCellHeight: number;
   readonly prefix: string;
   readonly container: D3Selection;
@@ -72,7 +72,7 @@ class OncoGrid<
   drawGridLines = false;
   crosshairMode = false;
 
-  constructor(params: OncoGridOptions<TColumn, TRow, TEvent> = {}) {
+  constructor(params: EventGridOptions<TColumn, TRow, TEvent> = {}) {
     super();
     this.params = params;
     this.width = params.width || 500;
@@ -82,7 +82,7 @@ class OncoGrid<
     if (rows.length && this.height / rows.length < this.minCellHeight) {
       this.height = rows.length * this.minCellHeight;
     }
-    this.prefix = params.prefix || 'og-';
+    this.prefix = params.prefix || 'eg-';
     this.container = d3.select(params.element || 'body')
       .append('div')
       .attr('class', `${this.prefix}container`)
@@ -90,15 +90,15 @@ class OncoGrid<
     this.initGrid();
   }
 
-  private emit<TKey extends keyof OncoGridEventMap<TColumn, TRow, TEvent>>(
+  private emit<TKey extends keyof EventGridEventMap<TColumn, TRow, TEvent>>(
     type: TKey,
-    detail?: OncoGridEventMap<TColumn, TRow, TEvent>[TKey]
+    detail?: EventGridEventMap<TColumn, TRow, TEvent>[TKey]
   ): boolean {
     return this.dispatchEvent(new CustomEvent(String(type), { detail }));
   }
 
   private initGrid(reloading = false): void {
-    const cloned = cloneDeep(this.params) as OncoGridOptions<TColumn, TRow, TEvent>;
+    const cloned = cloneDeep(this.params) as EventGridOptions<TColumn, TRow, TEvent>;
     this.columns = (cloned.columns || []) as Array<TColumn & PositionedColumn>;
     this.rows = (cloned.rows || []) as Array<TRow & PositionedRow>;
     this.events = (cloned.events || []) as Array<TEvent & PositionedEvent>;
@@ -108,7 +108,12 @@ class OncoGrid<
 
     this.createLookupTable();
     this.computeCounts();
-    this.computeRowScores();
+    if (cloned.sortByFrequency) {
+      this.computeRowFrequencyScores();
+      this.rowsSortByScores();
+    } else {
+      this.computeRowScores();
+    }
     this.computeScores();
     this.sortByScores();
     this.calculatePositions();
@@ -166,9 +171,9 @@ class OncoGrid<
   }
 
   render(): void {
-    this.emit(ONCOGRID_EVENTS.renderAllStart);
+    this.emit(EVENT_GRID_EVENTS.renderAllStart);
     this.mainGrid.render();
-    this.emit(ONCOGRID_EVENTS.renderAllEnd);
+    this.emit(EVENT_GRID_EVENTS.renderAllEnd);
   }
 
   private readonly update = (sortColumns = false): void => {
@@ -201,7 +206,7 @@ class OncoGrid<
 
   cluster(): void {
     this.computeCounts();
-    this.rows.forEach((row) => { row.score = row.count; });
+    this.computeRowFrequencyScores();
     this.rowsSortByScores();
     this.computeScores();
     this.sortByScores();
@@ -300,6 +305,15 @@ class OncoGrid<
     this.rows.forEach((row, index) => { row.score = this.rows.length - index; });
   }
 
+  private computeRowFrequencyScores(): void {
+    this.rows.forEach((row) => {
+      row.score = this.columns.reduce(
+        (count, column) => count + this.eventScore(column.id, row.id),
+        0
+      );
+    });
+  }
+
   private computeCounts(): void {
     const columnCounts: Record<string, number> = {};
     const rowCounts: Record<string, number> = {};
@@ -334,14 +348,14 @@ class OncoGrid<
   }
 }
 
-interface OncoGrid<
+interface EventGrid<
   TColumn extends GridItem = GridItem,
   TRow extends GridItem = GridItem,
   TEvent extends GridEvent = GridEvent
 > {
-  addEventListener<TKey extends keyof OncoGridEventMap<TColumn, TRow, TEvent>>(
+  addEventListener<TKey extends keyof EventGridEventMap<TColumn, TRow, TEvent>>(
     type: TKey,
-    listener: (event: CustomEvent<OncoGridEventMap<TColumn, TRow, TEvent>[TKey]>) => void,
+    listener: (event: CustomEvent<EventGridEventMap<TColumn, TRow, TEvent>[TKey]>) => void,
     options?: boolean | AddEventListenerOptions
   ): void;
   addEventListener(
@@ -349,9 +363,9 @@ interface OncoGrid<
     listener: EventListenerOrEventListenerObject | null,
     options?: boolean | AddEventListenerOptions
   ): void;
-  removeEventListener<TKey extends keyof OncoGridEventMap<TColumn, TRow, TEvent>>(
+  removeEventListener<TKey extends keyof EventGridEventMap<TColumn, TRow, TEvent>>(
     type: TKey,
-    listener: (event: CustomEvent<OncoGridEventMap<TColumn, TRow, TEvent>[TKey]>) => void,
+    listener: (event: CustomEvent<EventGridEventMap<TColumn, TRow, TEvent>[TKey]>) => void,
     options?: boolean | EventListenerOptions
   ): void;
   removeEventListener(
@@ -361,4 +375,4 @@ interface OncoGrid<
   ): void;
 }
 
-export default OncoGrid;
+export default EventGrid;

@@ -2,15 +2,15 @@ import {
   GridEvent,
   GridId,
   GridItem,
-  OncoGridOptions,
+  EventGridOptions,
   TrackDefinition,
   TrackItemPayload
 } from './types';
-import { OncoGridEventName } from './event-names';
+import { EventGridEventName } from './event-names';
 
 export type D3Selection = any;
 export type D3Scale = any;
-export type Emit = (eventName: OncoGridEventName, payload?: unknown) => boolean;
+export type Emit = (eventName: EventGridEventName, payload?: unknown) => boolean;
 export type UpdateCallback = (sortColumns?: boolean) => void;
 export type ResizeCallback = () => void;
 
@@ -37,7 +37,7 @@ export interface Margin {
   left: number;
 }
 
-export interface InternalOptions extends OncoGridOptions<PositionedColumn, PositionedRow, PositionedEvent> {
+export interface InternalOptions extends EventGridOptions<PositionedColumn, PositionedRow, PositionedEvent> {
   emit: Emit;
   wrapper: string;
   columns: PositionedColumn[];

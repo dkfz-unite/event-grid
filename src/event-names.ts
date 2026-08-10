@@ -1,4 +1,4 @@
-export const ONCOGRID_EVENTS = Object.freeze({
+export const EVENT_GRID_EVENTS = Object.freeze({
   gridClick: 'gridClick',
   gridMouseOver: 'gridMouseOver',
   gridMouseOut: 'gridMouseOut',
@@ -33,4 +33,4 @@ export const ONCOGRID_EVENTS = Object.freeze({
   renderRowTrackEnd: 'render:rowTrack:end'
 } as const);
 
-export type OncoGridEventName = typeof ONCOGRID_EVENTS[keyof typeof ONCOGRID_EVENTS];
+export type EventGridEventName = typeof EVENT_GRID_EVENTS[keyof typeof EVENT_GRID_EVENTS];

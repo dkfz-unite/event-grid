@@ -1,106 +1,105 @@
-.og-container {
+.eg-container {
     position: relative;
     color: #243b53;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     line-height: 1.25;
 }
 
-.og-container,
-.og-container * {
+.eg-container,
+.eg-container * {
     box-sizing: border-box;
 }
 
-.og-canvas {
+.eg-canvas {
     display: block;
 }
 
-.og-maingrid-svg {
+.eg-maingrid-svg {
     overflow: visible;
 }
 
-.og-background {
+.eg-background {
     fill: #ffffff;
     stroke: #829ab1;
     stroke-width: 0.5;
 }
 
-.og-track .background {
+.eg-track .background {
     fill: #f8fafc;
     stroke: #d9e2ec;
     stroke-width: 0.5;
 }
 
-.og-column-line,
-.og-row line,
-.og-track-grid-line,
-.og-histogram-axis {
+.eg-column-line,
+.eg-row line,
+.eg-track-grid-line,
+.eg-histogram-axis {
     stroke: #9fb3c8;
     stroke-opacity: 0.6;
     stroke-width: 1;
     shape-rendering: crispEdges;
 }
 
-.og-label-text-font,
-.og-track-group-label,
-.og-add-track,
-.og-remove-track {
+.eg-label-text-font,
+.eg-track-group-label,
+.eg-add-track,
+.eg-remove-track {
     fill: #334e68;
     font-family: inherit;
     user-select: none;
 }
 
-.og-label-text-font {
+.eg-label-text-font {
     font-size: 0.55rem;
 }
 
-.og-track-group-label {
+.eg-track-group-label {
     fill: #102a43;
     font-size: 0.72rem;
     font-weight: 600;
 }
 
-.og-row-label {
+.eg-row-label {
     cursor: move;
 }
 
-.og-track-label,
-.og-add-track,
-.og-remove-track {
+.eg-track-label,
+.eg-add-track,
+.eg-remove-track {
     cursor: pointer;
 }
 
-.og-add-track,
-.og-remove-track {
+.eg-add-track,
+.eg-remove-track {
     font-size: 0.75rem;
     font-weight: 700;
 }
 
-.og-event,
-.og-summary-bar,
-.og-track-data {
-    transition: opacity 120ms ease, stroke 120ms ease;
+.eg-event,
+.eg-summary-bar,
+.eg-track-data {
+    transition: fill-opacity 120ms ease;
 }
 
-.og-event:hover,
-.og-summary-bar:hover,
-.og-track-data:hover {
-    stroke: #102a43;
-    stroke-width: 1.5;
+.eg-event:hover,
+.eg-summary-bar:hover,
+.eg-track-data:hover {
+    fill-opacity: 0.7;
 }
 
-.og-summary-bar {
+.eg-summary-bar {
     shape-rendering: crispEdges;
 }
 
-.og-vertical-cross,
-.og-horizontal-cross {
+.eg-vertical-cross,
+.eg-horizontal-cross {
     stroke: #102a43;
     stroke-width: 1;
     pointer-events: none;
     shape-rendering: crispEdges;
 }
 
-.og-highlight {
+.eg-highlight {
     stroke: #0f766e;
     stroke-width: 1.5;
 }

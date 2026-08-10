@@ -3,14 +3,14 @@
 Import the constructor and default styles:
 
 ```ts
-import OncoGrid from '@dkfz-unite/oncogrid';
-import '@dkfz-unite/oncogrid/style.css';
+import EventGrid from '@dkfz-unite/event-grid';
+import '@dkfz-unite/event-grid/style.css';
 ```
 
 ## Constructor
 
 ```ts
-const grid = new OncoGrid({
+const grid = new EventGrid({
   element: '#grid',
   columns,
   rows,
@@ -43,12 +43,13 @@ See the [data interface](data-interface.md).
 | `scaleToFit` | `true` | Scale SVG to its container |
 | `leftTextWidth` | `80` | Space for row labels |
 | `margin` | `{ top: 30, right: 100, bottom: 15, left: 80 }` | Outer margins |
+| `sortByFrequency` | `false` | Rank rows by occupied columns, then columns by row-event pattern |
 | `grid` | `false` | Show cell lines |
-| `heatMap` | `false` | Start in heat-map mode |
+| `heatMap` | `false` | Start in heat-map mode; cells darken as their event count increases |
 | `heatMapColor` | `#D33682` | Heat-map color |
 | `eventStacking` | `v` | `v` for vertical or `h` for horizontal cell segments |
 | `rowHistogramWidth` | `80` | Row-histogram width |
-| `prefix` | `og-` | Generated CSS-class prefix |
+| `prefix` | `eg-` | Generated CSS-class prefix |
 
 ### Events and colors
 
@@ -58,7 +59,7 @@ See the [data interface](data-interface.md).
 | `colorPalette` | Replacement categorical palette |
 | `colorMap` | Per-type color overrides |
 
-The resolved colors are available as `grid.colorMap`; the built-in palette is `OncoGrid.defaultColorPalette`.
+The resolved colors are available as `grid.colorMap`; the built-in palette is `EventGrid.defaultColorPalette`.
 
 ### Tracks
 
@@ -80,26 +81,26 @@ A track definition accepts `name`, `fieldName`, and optional `type`, `group`, `c
 | --- | --- |
 | `render()` | Render the grid |
 | `resize(width, height)` | Resize the grid |
-| `cluster()` | Sort rows by event count and columns by row-event pattern |
+| `cluster()` | Apply frequency ordering immediately |
 | `sortColumns(comparator)`, `sortRows(comparator)` | Apply a custom order |
 | `removeColumns(predicate)`, `removeRows(predicate)` | Remove items and linked events |
 | `setHeatmap(active)`, `toggleHeatmap()` | Control heat-map mode |
 | `setGridLines(active)`, `toggleGridLines()` | Control cell lines |
 | `setCrosshair(active)`, `toggleCrosshair()` | Control crosshair mode |
-| `reload()` | Rebuild from constructor options |
+| `reload()` | Rebuild from constructor options and restore configured ordering |
 | `destroy()` | Remove rendered DOM |
 
 ## Native events
 
-OncoGrid extends [`EventTarget`](https://developer.mozilla.org/docs/Web/API/EventTarget). Event payloads are in [`CustomEvent.detail`](https://developer.mozilla.org/docs/Web/API/CustomEvent/detail). Use constants from `OncoGrid.eventNames`.
+EventGrid extends [`EventTarget`](https://developer.mozilla.org/docs/Web/API/EventTarget). Event payloads are in [`CustomEvent.detail`](https://developer.mozilla.org/docs/Web/API/CustomEvent/detail). Use constants from `EventGrid.eventNames`.
 
 ```ts
-const listener = ({ detail }: CustomEvent<OncoGrid.Cell>) => {
+const listener = ({ detail }: CustomEvent<EventGrid.Cell>) => {
   console.log(detail.events);
 };
 
-grid.addEventListener(OncoGrid.eventNames.gridClick, listener);
-grid.removeEventListener(OncoGrid.eventNames.gridClick, listener);
+grid.addEventListener(EventGrid.eventNames.gridClick, listener);
+grid.removeEventListener(EventGrid.eventNames.gridClick, listener);
 ```
 
 Use `{ once: true }` for a one-time listener.

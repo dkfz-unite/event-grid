@@ -1,26 +1,26 @@
 # TypeScript
 
-OncoGrid publishes declarations with its JavaScript. Consumers do not need TypeScript at runtime.
+EventGrid publishes declarations with its JavaScript. Consumers do not need TypeScript at runtime.
 
 ## Typed data
 
 ```ts
-import OncoGrid from '@dkfz-unite/oncogrid';
-import '@dkfz-unite/oncogrid/style.css';
+import EventGrid from '@dkfz-unite/event-grid';
+import '@dkfz-unite/event-grid/style.css';
 
-interface ProjectColumn extends OncoGrid.Item {
+interface ProjectColumn extends EventGrid.Item {
   owner: string;
 }
 
-interface ProjectRow extends OncoGrid.Item {
+interface ProjectRow extends EventGrid.Item {
   priority: number;
 }
 
-interface ProjectEvent extends OncoGrid.Event {
+interface ProjectEvent extends EventGrid.Event {
   note?: string;
 }
 
-const grid = new OncoGrid<ProjectColumn, ProjectRow, ProjectEvent>({
+const grid = new EventGrid<ProjectColumn, ProjectRow, ProjectEvent>({
   columns: [{ id: 'c1', owner: 'Avery' }],
   rows: [{ id: 'r1', priority: 1 }],
   events: [{
@@ -38,14 +38,14 @@ const grid = new OncoGrid<ProjectColumn, ProjectRow, ProjectEvent>({
 The event-name constant determines the type of `CustomEvent.detail`:
 
 ```ts
-grid.addEventListener(OncoGrid.eventNames.gridClick, ({ detail }) => {
+grid.addEventListener(EventGrid.eventNames.gridClick, ({ detail }) => {
   detail.column.owner;
   detail.row.priority;
   detail.events[0].note;
 });
 
 grid.addEventListener(
-  OncoGrid.eventNames.columnHistogramClick,
+  EventGrid.eventNames.columnHistogramClick,
   ({ detail }) => {
     detail.item.owner;
     detail.type;
@@ -57,14 +57,14 @@ grid.addEventListener(
 Use the native listener options and removal API:
 
 ```ts
-const listener = (event: CustomEvent<OncoGrid.Cell<
+const listener = (event: CustomEvent<EventGrid.Cell<
   ProjectColumn,
   ProjectRow,
   ProjectEvent
 >>) => console.log(event.detail);
 
-grid.addEventListener(OncoGrid.eventNames.gridClick, listener, { once: true });
-grid.removeEventListener(OncoGrid.eventNames.gridClick, listener);
+grid.addEventListener(EventGrid.eventNames.gridClick, listener, { once: true });
+grid.removeEventListener(EventGrid.eventNames.gridClick, listener);
 ```
 
 ## Public types

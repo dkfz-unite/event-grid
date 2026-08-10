@@ -1,4 +1,4 @@
-import './oncogrid.css';
-import OncoGrid from './index';
+import './event-grid.css';
+import EventGrid from './index';
 
-export default OncoGrid;
+export default EventGrid;

@@ -2,7 +2,7 @@ import d3 from 'd3';
 import ColumnHistogram from './column-histogram';
 import RowHistogram from './row-histogram';
 import Track from './track';
-import { ONCOGRID_EVENTS } from './event-names';
+import { EVENT_GRID_EVENTS } from './event-names';
 import { CellPayload, EventStacking, GridId } from './types';
 import {
   D3Scale,
@@ -88,7 +88,7 @@ class MainGrid {
 
     this.scaleToFit = typeof params.scaleToFit === 'boolean' ? params.scaleToFit : true;
     this.leftTextWidth = params.leftTextWidth || 80;
-    this.prefix = params.prefix || 'og-';
+    this.prefix = params.prefix || 'eg-';
     this.minCellHeight = params.minCellHeight || 10;
     this.columns = params.columns;
     this.rows = params.rows;
@@ -160,24 +160,24 @@ class MainGrid {
   }
 
   render(): void {
-    this.emit(ONCOGRID_EVENTS.renderMainGridStart);
+    this.emit(EVENT_GRID_EVENTS.renderMainGridStart);
     this.computeCoordinates();
     this.renderEvents();
     this.bindGridInteractions();
-    this.emit(ONCOGRID_EVENTS.renderMainGridEnd);
+    this.emit(EVENT_GRID_EVENTS.renderMainGridEnd);
 
-    this.emit(ONCOGRID_EVENTS.renderColumnHistogramStart);
+    this.emit(EVENT_GRID_EVENTS.renderColumnHistogramStart);
     this.columnHistogram.render();
-    this.emit(ONCOGRID_EVENTS.renderColumnHistogramEnd);
-    this.emit(ONCOGRID_EVENTS.renderRowHistogramStart);
+    this.emit(EVENT_GRID_EVENTS.renderColumnHistogramEnd);
+    this.emit(EVENT_GRID_EVENTS.renderRowHistogramStart);
     this.rowHistogram.render();
-    this.emit(ONCOGRID_EVENTS.renderRowHistogramEnd);
-    this.emit(ONCOGRID_EVENTS.renderColumnTrackStart);
+    this.emit(EVENT_GRID_EVENTS.renderRowHistogramEnd);
+    this.emit(EVENT_GRID_EVENTS.renderColumnTrackStart);
     this.columnTrack.render();
-    this.emit(ONCOGRID_EVENTS.renderColumnTrackEnd);
-    this.emit(ONCOGRID_EVENTS.renderRowTrackStart);
+    this.emit(EVENT_GRID_EVENTS.renderColumnTrackEnd);
+    this.emit(EVENT_GRID_EVENTS.renderRowTrackStart);
     this.rowTrack.render();
-    this.emit(ONCOGRID_EVENTS.renderRowTrackEnd);
+    this.emit(EVENT_GRID_EVENTS.renderRowTrackEnd);
     this.defineCrosshairBehaviour();
     this.resizeSvg();
   }
@@ -187,12 +187,12 @@ class MainGrid {
       .on('mouseover', () => {
         if (this.crosshair) return;
         const event = this.eventFromTarget(d3.event.target as HTMLElement);
-        if (event) this.emit(ONCOGRID_EVENTS.gridMouseOver, this.cellPayload(event.columnId, event.rowId));
+        if (event) this.emit(EVENT_GRID_EVENTS.gridMouseOver, this.cellPayload(event.columnId, event.rowId));
       })
-      .on('mouseout', () => this.emit(ONCOGRID_EVENTS.gridMouseOut))
+      .on('mouseout', () => this.emit(EVENT_GRID_EVENTS.gridMouseOut))
       .on('click', () => {
         const event = this.eventFromTarget(d3.event.target as HTMLElement);
-        if (event) this.emit(ONCOGRID_EVENTS.gridClick, this.cellPayload(event.columnId, event.rowId));
+        if (event) this.emit(EVENT_GRID_EVENTS.gridClick, this.cellPayload(event.columnId, event.rowId));
       });
   }
 
@@ -238,7 +238,7 @@ class MainGrid {
         `${this.prefix}event ${this.prefix}event-type-${safeClass(event.type)}`)
       .attr('d', (event: PositionedEvent) => this.getRectangularPath(event))
       .attr('fill', (event: PositionedEvent) => this.getColor(event))
-      .attr('opacity', () => this.getOpacity());
+      .attr('opacity', (event: PositionedEvent) => this.getOpacity(event));
     selection.exit().remove();
   }
 
@@ -348,7 +348,7 @@ class MainGrid {
       const column = this.columns[xIndex];
       const row = this.rows[yIndex];
       if (column && row) {
-        this.emit(ONCOGRID_EVENTS.gridCrosshairMouseOver, this.cellPayload(column.id, row.id));
+        this.emit(EVENT_GRID_EVENTS.gridCrosshairMouseOver, this.cellPayload(column.id, row.id));
       }
     };
 
@@ -373,7 +373,7 @@ class MainGrid {
         if (!grid.crosshair) return;
         grid.verticalCross.attr('opacity', 0);
         grid.horizontalCross.attr('opacity', 0);
-        grid.emit(ONCOGRID_EVENTS.gridCrosshairMouseOut);
+        grid.emit(EVENT_GRID_EVENTS.gridCrosshairMouseOut);
       });
   }
 
@@ -421,8 +421,10 @@ class MainGrid {
     return this.colorMap[event.type] || this.colorMap.default || '#0067a5';
   }
 
-  getOpacity(): number {
-    return this.heatMap ? 0.25 : 1;
+  getOpacity(event: PositionedEvent): number {
+    if (!this.heatMap) return 1;
+    const eventCount = Math.max(1, this.eventsAt(event.columnId, event.rowId).length);
+    return 1 - Math.pow(0.75, eventCount);
   }
 
   getRectangularPath(event: PositionedEvent): string {

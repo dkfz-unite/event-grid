@@ -1,12 +1,12 @@
 {
-  "name": "@dkfz-unite/oncogrid",
+  "name": "@dkfz-unite/event-grid",
   "description": "Generic column, row, and typed-event matrix visualization",
   "version": "4.0.0",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dkfz-unite/oncogrid.git"
+    "url": "git+https://github.com/dkfz-unite/event-grid.git"
   },
   "devDependencies": {
     "chai": "^3.5.0",
@@ -17,20 +17,20 @@
     "typescript": "^5.9.3",
     "vite": "^8.2.1"
   },
-  "main": "./dist/oncogrid.cjs",
-  "module": "./dist/oncogrid.js",
+  "main": "./dist/event-grid.cjs",
+  "module": "./dist/event-grid.js",
   "types": "./dist/index.d.ts",
-  "style": "./dist/oncogrid.css",
-  "unpkg": "./dist/oncogrid.umd.js",
-  "jsdelivr": "./dist/oncogrid.umd.js",
+  "style": "./dist/event-grid.css",
+  "unpkg": "./dist/event-grid.umd.js",
+  "jsdelivr": "./dist/event-grid.umd.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/oncogrid.js",
-      "require": "./dist/oncogrid.cjs",
-      "default": "./dist/oncogrid.js"
+      "import": "./dist/event-grid.js",
+      "require": "./dist/event-grid.cjs",
+      "default": "./dist/event-grid.js"
     },
-    "./style.css": "./dist/oncogrid.css",
+    "./style.css": "./dist/event-grid.css",
     "./package.json": "./package.json"
   },
   "sideEffects": [

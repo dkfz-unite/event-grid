@@ -1,6 +1,6 @@
 'use strict';
 
-var OncoGridSampleData = (function () {
+var EventGridSampleData = (function () {
   var columns = [];
   var rows = [];
   var events = [];

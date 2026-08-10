@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import { ONCOGRID_EVENTS } from './event-names';
+import { EVENT_GRID_EVENTS } from './event-names';
 import {
   D3Scale,
   D3Selection,
@@ -59,7 +59,7 @@ class TrackGroup {
     resizeCallback: ResizeCallback
   ) {
     this.emit = params.emit;
-    this.prefix = params.prefix || 'og-';
+    this.prefix = params.prefix || 'eg-';
     this.expandable = params.expandable;
     this.name = name;
     this.cellHeight = params.cellHeight || 20;
@@ -164,8 +164,8 @@ class TrackGroup {
     this.cellWidth = this.domain.length ? this.width / this.domain.length : 0;
     this.renderData();
     this.legend
-      .on('mouseover', () => this.emit(ONCOGRID_EVENTS.trackLegendMouseOver, { group: this.name }))
-      .on('mouseout', () => this.emit(ONCOGRID_EVENTS.trackLegendMouseOut));
+      .on('mouseover', () => this.emit(EVENT_GRID_EVENTS.trackLegendMouseOver, { group: this.name }))
+      .on('mouseout', () => this.emit(EVENT_GRID_EVENTS.trackLegendMouseOut));
   }
 
   update(domain: Array<PositionedColumn | PositionedRow>): void {
@@ -277,7 +277,7 @@ class TrackGroup {
           .attr('x', -6)
           .attr('dy', '.32em')
           .attr('text-anchor', 'end')
-          .on('click', () => this.emit(ONCOGRID_EVENTS.addTrackClick, {
+          .on('click', () => this.emit(EVENT_GRID_EVENTS.addTrackClick, {
             hiddenTracks: this.collapsedTracks.slice(),
             addTrack: this.addTrack.bind(this)
           }));
@@ -323,8 +323,8 @@ class TrackGroup {
       .on('mouseout', () => {
         const axis = this.rotated ? 'row' : 'column';
         const axisEvent = axis === 'column'
-          ? ONCOGRID_EVENTS.columnTrackMouseOut
-          : ONCOGRID_EVENTS.rowTrackMouseOut;
+          ? EVENT_GRID_EVENTS.columnTrackMouseOut
+          : EVENT_GRID_EVENTS.rowTrackMouseOut;
         this.emit(axisEvent, { axis });
       });
   }
@@ -337,8 +337,8 @@ class TrackGroup {
     const axis = this.rotated ? 'row' : 'column';
     const payload = { item, axis };
     const axisEvent = axis === 'column'
-      ? suffix === 'Click' ? ONCOGRID_EVENTS.columnTrackClick : ONCOGRID_EVENTS.columnTrackMouseOver
-      : suffix === 'Click' ? ONCOGRID_EVENTS.rowTrackClick : ONCOGRID_EVENTS.rowTrackMouseOver;
+      ? suffix === 'Click' ? EVENT_GRID_EVENTS.columnTrackClick : EVENT_GRID_EVENTS.columnTrackMouseOver
+      : suffix === 'Click' ? EVENT_GRID_EVENTS.rowTrackClick : EVENT_GRID_EVENTS.rowTrackMouseOver;
     this.emit(axisEvent, payload);
   }
 

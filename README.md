@@ -1,12 +1,12 @@
-# OncoGrid
+# EventGrid
 
-OncoGrid renders a generic matrix of columns, rows, and typed events. It includes colored event-frequency histograms, metadata tracks, multiple events per cell, sorting, clustering, grid lines, and crosshair interaction.
+EventGrid renders a generic matrix of columns, rows, and typed events. It includes colored event-frequency histograms, metadata tracks, multiple events per cell, optional frequency ordering, heat maps, grid lines, and crosshair interaction.
 
-![OncoGrid playground](docs/images/oncogrid-playground.jpg)
+![EventGrid playground](docs/images/event-grid-playground.png)
 
 ## About this fork
 
-This is a modern package forked from the [original OncoJS OncoGrid](https://github.com/oncojs/oncogrid) and decoupled from its ICGC bioinformatics topic. Donors, genes, mutations, and consequences are now generic columns, rows, events, and event types.
+This is a modern, domain-agnostic fork of an original [OncoJS](https://github.com/oncojs) matrix visualization created for ICGC bioinformatics data. Its donor, gene, mutation, and consequence concepts are now generic columns, rows, events, and event types.
 
 The fork adds:
 
@@ -21,7 +21,7 @@ The fork adds:
 Configure GitHub Packages once, then install:
 
 ```sh
-npm install @dkfz-unite/oncogrid
+npm install @dkfz-unite/event-grid
 ```
 
 See [Getting started](docs/getting-started.md#install-from-github-packages) for the required `.npmrc`.
@@ -29,10 +29,10 @@ See [Getting started](docs/getting-started.md#install-from-github-packages) for 
 ## Quick start
 
 ```js
-import OncoGrid from '@dkfz-unite/oncogrid';
-import '@dkfz-unite/oncogrid/style.css';
+import EventGrid from '@dkfz-unite/event-grid';
+import '@dkfz-unite/event-grid/style.css';
 
-const grid = new OncoGrid({
+const grid = new EventGrid({
   element: '#grid',
   columns: [{ id: 'c1', label: 'Alpha' }],
   rows: [{ id: 'r1', label: 'Planning' }],
@@ -41,7 +41,7 @@ const grid = new OncoGrid({
   ]
 });
 
-grid.addEventListener(OncoGrid.eventNames.gridClick, ({ detail }) => {
+grid.addEventListener(EventGrid.eventNames.gridClick, ({ detail }) => {
   console.log(detail.column, detail.row, detail.events);
 });
 
@@ -75,4 +75,4 @@ The playground uses deterministic [15 × 30 sample data](test/data/sample-data.j
 
 ## Attribution
 
-Based on the [original `oncogrid` package](https://www.npmjs.com/package/oncogrid) by the OncoJS contributors, originally developed for ICGC at the Ontario Institute for Cancer Research. This fork is maintained under the DKFZ UNITE package scope.
+Based on original work by the OncoJS contributors for ICGC at the Ontario Institute for Cancer Research. This fork is maintained under the DKFZ UNITE package scope.

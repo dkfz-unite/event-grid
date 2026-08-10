@@ -21,7 +21,7 @@ function sortNumber(field) {
   return function (a, b) { return b[field] - a[field]; };
 }
 
-var grid = new OncoGrid({
+var grid = new EventGrid({
   element: '#grid-div',
   columns: columns,
   rows: rows,

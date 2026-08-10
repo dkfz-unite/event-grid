@@ -50,7 +50,7 @@ class Track {
     this.emit = params.emit;
     this.padding = params.trackPadding ?? 20;
     this.offset = offset;
-    this.prefix = params.prefix || 'og-';
+    this.prefix = params.prefix || 'eg-';
     this.svg = svg;
     this.rotated = rotated;
     this.updateCallback = updateCallback;

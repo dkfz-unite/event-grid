@@ -1,8 +1,8 @@
-/* global chai, OncoGrid */
+/* global chai, EventGrid */
 var expect = chai.expect;
 
 function fixture(element) {
-  return new OncoGrid({
+  return new EventGrid({
     element: element,
     columns: [
       { id: 'c1', label: 'Alpha' },
@@ -26,9 +26,9 @@ function fixture(element) {
   });
 }
 
-describe('OncoGrid generic interface', function () {
+describe('EventGrid generic interface', function () {
   it('accepts an empty configuration', function () {
-    var grid = new OncoGrid({ element: '#test1' });
+    var grid = new EventGrid({ element: '#test1' });
     expect(grid.columns).to.be.empty;
     expect(grid.rows).to.be.empty;
     expect(grid.events).to.be.empty;
@@ -46,7 +46,7 @@ describe('OncoGrid generic interface', function () {
 
   it('dispatches native CustomEvents with constants and standard listener options', function () {
     var grid = fixture('#test1');
-    var events = OncoGrid.eventNames;
+    var events = EventGrid.eventNames;
     var startCount = 0;
     var removedCount = 0;
     var cellDetail;
@@ -62,7 +62,7 @@ describe('OncoGrid generic interface', function () {
     grid.addEventListener(events.gridClick, function (event) { cellDetail = event.detail; });
 
     grid.render();
-    document.querySelector('#test1 .og-event').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    document.querySelector('#test1 .eg-event').dispatchEvent(new MouseEvent('click', { bubbles: true }));
     grid.render();
 
     expect(startCount).to.equal(1);
@@ -77,9 +77,9 @@ describe('OncoGrid generic interface', function () {
   it('renders labels and event types from the generic fields', function () {
     var grid = fixture('#test3');
     grid.render();
-    expect(document.querySelectorAll('#test3 .og-event').length).to.equal(4);
-    expect(document.querySelector('#test3 .og-row-label').textContent).to.equal('Planning');
-    expect(document.querySelector('#test3 .og-event-type-complete').getAttribute('fill')).to.equal('#0a0');
+    expect(document.querySelectorAll('#test3 .eg-event').length).to.equal(4);
+    expect(document.querySelector('#test3 .eg-row-label').textContent).to.equal('Planning');
+    expect(document.querySelector('#test3 .eg-event-type-complete').getAttribute('fill')).to.equal('#0a0');
     grid.destroy();
   });
 
@@ -94,7 +94,7 @@ describe('OncoGrid generic interface', function () {
   });
 
   it('can split multiple events horizontally', function () {
-    var grid = new OncoGrid({
+    var grid = new EventGrid({
       element: '#test7',
       columns: [{ id: 'c1', label: 'Alpha' }],
       rows: [{ id: 'r1', label: 'Planning' }],
@@ -107,7 +107,7 @@ describe('OncoGrid generic interface', function () {
     });
     grid.render();
 
-    var eventSegments = document.querySelectorAll('#test7 .og-event');
+    var eventSegments = document.querySelectorAll('#test7 .eg-event');
     expect(eventSegments.length).to.equal(2);
     expect(eventSegments[0].getAttribute('data-cell-event-count')).to.equal('2');
     expect(eventSegments[0].getAttribute('data-event-stacking')).to.equal('h');
@@ -116,7 +116,7 @@ describe('OncoGrid generic interface', function () {
   });
 
   it('stacks multiple events vertically by default', function () {
-    var grid = new OncoGrid({
+    var grid = new EventGrid({
       element: '#test8',
       columns: [{ id: 'c1', label: 'Alpha' }],
       rows: [{ id: 'r1', label: 'Planning' }],
@@ -128,15 +128,71 @@ describe('OncoGrid generic interface', function () {
     });
     grid.render();
 
-    var eventSegments = document.querySelectorAll('#test8 .og-event');
+    var eventSegments = document.querySelectorAll('#test8 .eg-event');
     expect(eventSegments.length).to.equal(2);
     expect(eventSegments[0].getAttribute('data-event-stacking')).to.equal('v');
     expect(eventSegments[0].getAttribute('d')).not.to.equal(eventSegments[1].getAttribute('d'));
     grid.destroy();
   });
 
+  it('optionally orders rows by occupied columns and columns by row pattern', function () {
+    var grid = new EventGrid({
+      element: '#test10',
+      columns: [{ id: 'c4' }, { id: 'c1' }, { id: 'c2' }, { id: 'c3' }],
+      rows: [{ id: 'r1' }, { id: 'r3' }, { id: 'r2' }],
+      events: [
+        { id: 'e1', columnId: 'c1', rowId: 'r2', type: 'active' },
+        { id: 'e2', columnId: 'c2', rowId: 'r2', type: 'active' },
+        { id: 'e3', columnId: 'c3', rowId: 'r2', type: 'active' },
+        { id: 'e4', columnId: 'c2', rowId: 'r3', type: 'active' },
+        { id: 'e5', columnId: 'c3', rowId: 'r3', type: 'active' },
+        { id: 'e6', columnId: 'c3', rowId: 'r1', type: 'active' },
+        { id: 'e7', columnId: 'c3', rowId: 'r1', type: 'flagged' }
+      ],
+      sortByFrequency: true
+    });
+
+    expect(grid.rows.map(function (row) { return row.id; })).to.deep.equal(['r2', 'r3', 'r1']);
+    expect(grid.columns.map(function (column) { return column.id; })).to.deep.equal(['c3', 'c2', 'c1', 'c4']);
+
+    grid.sortRows(function (first, second) { return String(first.id).localeCompare(String(second.id)); });
+    grid.sortColumns(function (first, second) { return String(first.id).localeCompare(String(second.id)); });
+    grid.reload();
+
+    expect(grid.rows.map(function (row) { return row.id; })).to.deep.equal(['r2', 'r3', 'r1']);
+    expect(grid.columns.map(function (column) { return column.id; })).to.deep.equal(['c3', 'c2', 'c1', 'c4']);
+    grid.destroy();
+  });
+
+  it('darkens heat-map cells containing multiple events', function () {
+    var grid = new EventGrid({
+      element: '#test10',
+      columns: [{ id: 'c1' }, { id: 'c2' }],
+      rows: [{ id: 'r1' }],
+      events: [
+        { id: 'e1', columnId: 'c1', rowId: 'r1', type: 'active' },
+        { id: 'e2', columnId: 'c2', rowId: 'r1', type: 'active' },
+        { id: 'e3', columnId: 'c2', rowId: 'r1', type: 'flagged' }
+      ],
+      heatMap: true,
+      heatMapColor: '#336699'
+    });
+    grid.render();
+
+    var singleEvent = document.querySelector('#test10 .eg-event[data-column-id="c1"]');
+    var multipleEvents = document.querySelectorAll('#test10 .eg-event[data-column-id="c2"]');
+    var singleOpacity = Number(singleEvent.getAttribute('opacity'));
+    var multipleOpacity = Number(multipleEvents[0].getAttribute('opacity'));
+
+    expect(singleEvent.getAttribute('fill')).to.equal('#336699');
+    expect(multipleEvents[0].getAttribute('fill')).to.equal('#336699');
+    expect(multipleOpacity).to.be.above(singleOpacity);
+    expect(Number(multipleEvents[1].getAttribute('opacity'))).to.equal(multipleOpacity);
+    grid.destroy();
+  });
+
   it('assigns consistent default colors by event type', function () {
-    var grid = new OncoGrid({
+    var grid = new EventGrid({
       element: '#test9',
       columns: [{ id: 'c1' }, { id: 'c2' }],
       rows: [{ id: 'r1' }],
@@ -148,9 +204,9 @@ describe('OncoGrid generic interface', function () {
     });
     grid.render();
 
-    var alphaEvents = document.querySelectorAll('#test9 .og-event-type-alpha');
-    var alphaSummary = document.querySelector('#test9 .og-column-histogram [data-event-type="alpha"]');
-    expect(OncoGrid.defaultColorPalette.length).to.be.at.least(15);
+    var alphaEvents = document.querySelectorAll('#test9 .eg-event-type-alpha');
+    var alphaSummary = document.querySelector('#test9 .eg-column-histogram [data-event-type="alpha"]');
+    expect(EventGrid.defaultColorPalette.length).to.be.at.least(15);
     expect(grid.colorMap.alpha).not.to.equal(grid.colorMap.beta);
     expect(alphaEvents[0].getAttribute('fill')).to.equal(grid.colorMap.alpha);
     expect(alphaEvents[1].getAttribute('fill')).to.equal(grid.colorMap.alpha);
@@ -159,7 +215,7 @@ describe('OncoGrid generic interface', function () {
   });
 
   it('cycles a custom palette and applies per-type color overrides', function () {
-    var grid = new OncoGrid({
+    var grid = new EventGrid({
       element: '#test10',
       columns: [{ id: 'c1' }],
       rows: [{ id: 'r1' }],

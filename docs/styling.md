@@ -3,8 +3,8 @@
 Import the default stylesheet before overrides:
 
 ```ts
-import '@dkfz-unite/oncogrid/style.css';
-import './oncogrid-overrides.css';
+import '@dkfz-unite/event-grid/style.css';
+import './event-grid-overrides.css';
 ```
 
 Defaults cover the grid, axes, labels, tracks, hover states, and crosshair.
@@ -14,20 +14,19 @@ Defaults cover the grid, axes, labels, tracks, hover states, and crosshair.
 Scope rules to the host when a page contains more than one grid:
 
 ```css
-#project-grid .og-background {
+#project-grid .eg-background {
   fill: #fcfcfd;
   stroke: #64748b;
 }
 
-#project-grid .og-label-text-font {
+#project-grid .eg-label-text-font {
   fill: #1e293b;
   font-size: 0.65rem;
 }
 
-#project-grid .og-event:hover,
-#project-grid .og-summary-bar:hover {
-  stroke: #0f172a;
-  stroke-width: 2;
+#project-grid .eg-event:hover,
+#project-grid .eg-summary-bar:hover {
+  fill-opacity: 0.6;
 }
 ```
 
@@ -35,23 +34,23 @@ Scope rules to the host when a page contains more than one grid:
 
 | Selector | Element |
 | --- | --- |
-| `.og-container` | Component root |
-| `.og-background` | Matrix background and border |
-| `.og-column-line`, `.og-row line` | Matrix lines |
-| `.og-histogram-axis` | Histogram axes |
-| `.og-label-text-font`, `.og-row-label` | Labels |
-| `.og-track-group-label`, `.og-track-label` | Track labels |
-| `.og-event` | Cell event segments |
-| `.og-summary-bar` | Histogram segments |
-| `.og-track-data` | Track cells |
-| `.og-vertical-cross`, `.og-horizontal-cross` | Crosshair |
+| `.eg-container` | Component root |
+| `.eg-background` | Matrix background and border |
+| `.eg-column-line`, `.eg-row line` | Matrix lines |
+| `.eg-histogram-axis` | Histogram axes |
+| `.eg-label-text-font`, `.eg-row-label` | Labels |
+| `.eg-track-group-label`, `.eg-track-label` | Track labels |
+| `.eg-event` | Cell event segments |
+| `.eg-summary-bar` | Histogram segments |
+| `.eg-track-data` | Track cells |
+| `.eg-vertical-cross`, `.eg-horizontal-cross` | Crosshair |
 
 ## Event colors
 
 Configure colors through options so cells and histograms stay synchronized:
 
 ```ts
-const grid = new OncoGrid({
+const grid = new EventGrid({
   columns,
   rows,
   events,
@@ -64,4 +63,4 @@ Use options for geometry and behavior; use CSS for typography, borders, backgrou
 
 ## Custom prefix
 
-The bundled stylesheet targets `og-`. A custom `prefix` changes generated class names, so it also requires matching application CSS.
+The bundled stylesheet targets `eg-`. A custom `prefix` changes generated class names, so it also requires matching application CSS.

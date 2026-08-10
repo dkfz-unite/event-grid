@@ -38,14 +38,14 @@ export default defineConfig({
     sourcemap: true,
     lib: {
       entry: resolve(import.meta.dirname, 'src/vite-entry.ts'),
-      name: 'OncoGrid',
+      name: 'EventGrid',
       formats: ['es', 'cjs', 'umd'],
       fileName: (format) => {
-        if (format === 'es') return 'oncogrid.js';
-        if (format === 'cjs') return 'oncogrid.cjs';
-        return 'oncogrid.umd.js';
+        if (format === 'es') return 'event-grid.js';
+        if (format === 'cjs') return 'event-grid.cjs';
+        return 'event-grid.umd.js';
       },
-      cssFileName: 'oncogrid'
+      cssFileName: 'event-grid'
     },
     rolldownOptions: {
       output: {

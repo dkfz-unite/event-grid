@@ -7,7 +7,7 @@ import {
   PositionedEvent,
   idKey
 } from './internal-types';
-import { ONCOGRID_EVENTS } from './event-names';
+import { EVENT_GRID_EVENTS } from './event-names';
 
 import d3 from 'd3';
 
@@ -73,7 +73,7 @@ class ColumnHistogram {
     const borderPadding = params.histogramBorderPadding || {};
     this.lineWidthOffset = borderPadding.left || 10;
     this.lineHeightOffset = borderPadding.bottom || 5;
-    this.prefix = params.prefix || 'og-';
+    this.prefix = params.prefix || 'eg-';
     this.emit = params.emit;
     this.svg = svg;
     this.items = params.columns || [];
@@ -104,17 +104,17 @@ class ColumnHistogram {
         const index = target.dataset && target.dataset.itemIndex;
         if (typeof index === 'undefined' || !this.items[Number(index)]) return;
         const payload = this.payloadFor(target, Number(index));
-        this.emit(ONCOGRID_EVENTS.columnHistogramMouseOver, payload);
+        this.emit(EVENT_GRID_EVENTS.columnHistogramMouseOver, payload);
       })
       .on('mouseout', () => {
-        this.emit(ONCOGRID_EVENTS.columnHistogramMouseOut, { axis: 'column' });
+        this.emit(EVENT_GRID_EVENTS.columnHistogramMouseOut, { axis: 'column' });
       })
       .on('click', () => {
         const target = d3.event.target as HTMLElement;
         const index = target.dataset && target.dataset.itemIndex;
         if (typeof index === 'undefined' || !this.items[Number(index)]) return;
         const payload = this.payloadFor(target, Number(index));
-        this.emit(ONCOGRID_EVENTS.columnHistogramClick, payload);
+        this.emit(EVENT_GRID_EVENTS.columnHistogramClick, payload);
       });
   }
 

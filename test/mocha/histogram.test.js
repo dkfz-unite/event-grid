@@ -1,4 +1,4 @@
-/* global chai, OncoGrid */
+/* global chai, EventGrid */
 var expect = chai.expect;
 
 describe('Histograms', function () {
@@ -9,7 +9,7 @@ describe('Histograms', function () {
   }
 
   it('renders colored event-type stacks in both histograms', function () {
-    var grid = new OncoGrid({
+    var grid = new EventGrid({
       element: '#test5',
       columns: [{ id: 'c1' }, { id: 'c2' }, { id: 'c3' }],
       rows: [{ id: 'r1', label: 'First' }, { id: 'r2', label: 'Second' }],
@@ -24,11 +24,11 @@ describe('Histograms', function () {
     });
     grid.render();
 
-    var columnBars = document.querySelectorAll('#test5 .og-column-histogram .og-histogram-bar');
-    var rowBars = document.querySelectorAll('#test5 .og-row-histogram .og-summary-bar');
-    var rowAxis = document.querySelectorAll('#test5 .og-row-histogram .og-histogram-axis');
+    var columnBars = document.querySelectorAll('#test5 .eg-column-histogram .eg-histogram-bar');
+    var rowBars = document.querySelectorAll('#test5 .eg-row-histogram .eg-summary-bar');
+    var rowAxis = document.querySelectorAll('#test5 .eg-row-histogram .eg-histogram-axis');
     expect(columnBars.length).to.equal(4);
-    expect(document.querySelectorAll('#test5 .og-histogram').length).to.equal(1);
+    expect(document.querySelectorAll('#test5 .eg-histogram').length).to.equal(1);
     expect(rowBars.length).to.equal(4);
     expect(columnBars[0].getAttribute('height')).to.equal('40');
     expect(columnBars[1].getAttribute('height')).to.equal('40');
@@ -40,12 +40,12 @@ describe('Histograms', function () {
     expect(rowBars[1].getAttribute('fill')).to.equal('#aa0000');
     expect(rowAxis[1].getAttribute('y1')).to.equal('0');
     expect(rowAxis[1].getAttribute('y2')).to.equal('0');
-    expect(document.querySelector('#test5 .og-row-histogram').textContent).to.contain('Event frequency');
+    expect(document.querySelector('#test5 .eg-row-histogram').textContent).to.contain('Event frequency');
     grid.destroy();
   });
 
   it('emits separate row and column histogram events', function () {
-    var grid = new OncoGrid({
+    var grid = new EventGrid({
       element: '#test5',
       columns: [{ id: 'c1', label: 'Column' }],
       rows: [{ id: 'r1', label: 'Row' }],
@@ -55,15 +55,15 @@ describe('Histograms', function () {
     var columnClick;
     var rowHover;
     var rowClick;
-    var events = OncoGrid.eventNames;
+    var events = EventGrid.eventNames;
     grid.addEventListener(events.columnHistogramMouseOver, function (event) { columnHover = event.detail; });
     grid.addEventListener(events.columnHistogramClick, function (event) { columnClick = event.detail; });
     grid.addEventListener(events.rowHistogramMouseOver, function (event) { rowHover = event.detail; });
     grid.addEventListener(events.rowHistogramClick, function (event) { rowClick = event.detail; });
     grid.render();
 
-    var columnBar = document.querySelector('#test5 .og-column-histogram .og-summary-bar');
-    var rowBar = document.querySelector('#test5 .og-row-histogram .og-summary-bar');
+    var columnBar = document.querySelector('#test5 .eg-column-histogram .eg-summary-bar');
+    var rowBar = document.querySelector('#test5 .eg-row-histogram .eg-summary-bar');
     dispatch(columnBar, 'mouseover');
     dispatch(columnBar, 'click');
     dispatch(rowBar, 'mouseover');

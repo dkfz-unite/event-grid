@@ -7,7 +7,7 @@ import {
   RowEventStat,
   idKey
 } from './internal-types';
-import { ONCOGRID_EVENTS } from './event-names';
+import { EVENT_GRID_EVENTS } from './event-names';
 
 import d3 from 'd3';
 
@@ -70,7 +70,7 @@ class RowHistogram {
   ) {
     this.summaryEventTypes = params.summaryEventTypes || params.types || [];
     this.events = events || [];
-    this.prefix = params.prefix || 'og-';
+    this.prefix = params.prefix || 'eg-';
     this.emit = params.emit;
     this.svg = svgElement;
     this.domain = params.rows || [];
@@ -99,15 +99,15 @@ class RowHistogram {
       .on('mouseover', () => {
         const target = d3.event.target as HTMLElement;
         if (!target.dataset || !target.dataset.rowId) return;
-        this.emit(ONCOGRID_EVENTS.rowHistogramMouseOver, this.payloadFor(target));
+        this.emit(EVENT_GRID_EVENTS.rowHistogramMouseOver, this.payloadFor(target));
       })
       .on('mouseout', () => {
-        this.emit(ONCOGRID_EVENTS.rowHistogramMouseOut, { axis: 'row' });
+        this.emit(EVENT_GRID_EVENTS.rowHistogramMouseOut, { axis: 'row' });
       })
       .on('click', () => {
         const target = d3.event.target as HTMLElement;
         if (!target.dataset || !target.dataset.rowId) return;
-        this.emit(ONCOGRID_EVENTS.rowHistogramClick, this.payloadFor(target));
+        this.emit(EVENT_GRID_EVENTS.rowHistogramClick, this.payloadFor(target));
       });
   }
 

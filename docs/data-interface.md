@@ -1,6 +1,6 @@
 # Data interface
 
-OncoGrid accepts `columns`, `rows`, and `events`. It assigns no business meaning to them.
+EventGrid accepts `columns`, `rows`, and `events`. It assigns no business meaning to them.
 
 ## Example
 
@@ -21,7 +21,7 @@ const events = [
   { id: 'e3', columnId: 'c2', rowId: 'r2', type: 'blocked' }
 ];
 
-const grid = new OncoGrid({ columns, rows, events });
+const grid = new EventGrid({ columns, rows, events });
 ```
 
 ## Schema
@@ -59,12 +59,27 @@ eventStacking: 'h' // horizontally arranged
 
 Interaction details return every event in the cell.
 
+## Frequency ordering
+
+Enable the original waterfall-like ordering when constructing the grid:
+
+```ts
+const grid = new EventGrid({
+  columns,
+  rows,
+  events,
+  sortByFrequency: true
+});
+```
+
+Rows with events in the most columns appear first. Multiple events in one cell count once. Columns are then ordered by event presence from the first row downward, placing occupied cells toward the upper left. `reload()` restores this configured ordering; `cluster()` applies it on demand.
+
 ## Histograms and colors
 
 Both histograms show total frequency and colored type proportions. `summaryEventTypes` filters and orders their segments.
 
 ```ts
-const grid = new OncoGrid({
+const grid = new EventGrid({
   columns,
   rows,
   events,
@@ -96,7 +111,7 @@ Use column or row fill and opacity callbacks to style track cells. Callback data
 ## Interaction detail
 
 ```ts
-grid.addEventListener(OncoGrid.eventNames.gridClick, ({ detail }) => {
+grid.addEventListener(EventGrid.eventNames.gridClick, ({ detail }) => {
   detail.columnId;
   detail.rowId;
   detail.column;

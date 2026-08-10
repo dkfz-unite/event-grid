@@ -1,4 +1,4 @@
-import RuntimeOncoGrid from './oncogrid';
+import RuntimeEventGrid from './event-grid';
 import {
   Axis,
   CellPayload,
@@ -7,32 +7,32 @@ import {
   GridId,
   GridItem,
   ColumnHistogramPayload,
-  OncoGridEventMap,
-  OncoGridOptions,
+  EventGridEventMap,
+  EventGridOptions,
   RowHistogramPayload,
   TrackDefinition,
   TrackItemPayload,
   TrackPayload
 } from './types';
 
-class OncoGrid<
+class EventGrid<
   TColumn extends GridItem = GridItem,
   TRow extends GridItem = GridItem,
   TEvent extends GridEvent = GridEvent
-> extends RuntimeOncoGrid<TColumn, TRow, TEvent> {
-  constructor(options: OncoGridOptions<TColumn, TRow, TEvent> = {}) {
+> extends RuntimeEventGrid<TColumn, TRow, TEvent> {
+  constructor(options: EventGridOptions<TColumn, TRow, TEvent> = {}) {
     super(options);
   }
 }
 
-namespace OncoGrid {
+namespace EventGrid {
   export type Id = GridId;
   export type Item = GridItem;
   export type Event = GridEvent;
   export type Stacking = EventStacking;
   export type GridAxis = Axis;
-  export type Options<TColumn extends GridItem = GridItem, TRow extends GridItem = GridItem, TEvent extends GridEvent = GridEvent> = OncoGridOptions<TColumn, TRow, TEvent>;
-  export type Events<TColumn extends GridItem = GridItem, TRow extends GridItem = GridItem, TEvent extends GridEvent = GridEvent> = OncoGridEventMap<TColumn, TRow, TEvent>;
+  export type Options<TColumn extends GridItem = GridItem, TRow extends GridItem = GridItem, TEvent extends GridEvent = GridEvent> = EventGridOptions<TColumn, TRow, TEvent>;
+  export type Events<TColumn extends GridItem = GridItem, TRow extends GridItem = GridItem, TEvent extends GridEvent = GridEvent> = EventGridEventMap<TColumn, TRow, TEvent>;
   export type Cell<TColumn extends GridItem = GridItem, TRow extends GridItem = GridItem, TEvent extends GridEvent = GridEvent> = CellPayload<TColumn, TRow, TEvent>;
   export type ColumnHistogram<TColumn extends GridItem = GridItem> = ColumnHistogramPayload<TColumn>;
   export type RowHistogram<TRow extends GridItem = GridItem> = RowHistogramPayload<TRow>;
@@ -41,4 +41,4 @@ namespace OncoGrid {
   export type TrackEvent<TAxis extends Axis = Axis> = TrackPayload<TAxis>;
 }
 
-export default OncoGrid;
+export default EventGrid;

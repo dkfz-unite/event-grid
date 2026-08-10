@@ -12,7 +12,7 @@ Add the registry and an environment-based token to the consuming project's `.npm
 Set `GITHUB_PACKAGES_TOKEN` to a classic GitHub token with `read:packages`, then install:
 
 ```sh
-npm install @dkfz-unite/oncogrid
+npm install @dkfz-unite/event-grid
 ```
 
 Do not commit a token value. See [GitHub's npm registry guide](https://docs.github.com/packages/working-with-a-github-packages-registry/working-with-the-npm-registry).
@@ -28,10 +28,10 @@ Add a host element:
 Import the component and its default styles from any ESM entry file:
 
 ```js
-import OncoGrid from '@dkfz-unite/oncogrid';
-import '@dkfz-unite/oncogrid/style.css';
+import EventGrid from '@dkfz-unite/event-grid';
+import '@dkfz-unite/event-grid/style.css';
 
-const grid = new OncoGrid({
+const grid = new EventGrid({
   element: '#grid',
   columns: [{ id: 'c1', label: 'Alpha' }],
   rows: [{ id: 'r1', label: 'Planning' }],
