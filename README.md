@@ -39,7 +39,7 @@ const configuration = {
 };
 
 const grid = new EventGrid(configuration);
-grid.render();
+grid.render(); 
 ```
 
 No global scripts are required. The package includes its JavaScript builds, default CSS, and TypeScript declarations.
