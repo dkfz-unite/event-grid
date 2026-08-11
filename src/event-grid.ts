@@ -139,7 +139,6 @@ class EventGrid<
       options,
       this.lookupTable,
       this.update,
-      () => this.resize(this.width, this.height),
       this.x,
       this.y
     );

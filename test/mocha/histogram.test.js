@@ -3,9 +3,7 @@ var expect = chai.expect;
 
 describe('Histograms', function () {
   function dispatch(target, name) {
-    var event = document.createEvent('MouseEvents');
-    event.initEvent(name, true, true);
-    target.dispatchEvent(event);
+    target.dispatchEvent(new MouseEvent(name, { bubbles: true, cancelable: true }));
   }
 
   it('renders colored event-type stacks in both histograms', function () {

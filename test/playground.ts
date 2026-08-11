@@ -1,35 +1,6 @@
 import EventGrid from '../src';
 import '../src/event-grid.css';
-
-interface SampleColumn extends EventGrid.Item {
-  owner: string;
-  group: string;
-  capacity: number;
-}
-
-interface SampleRow extends EventGrid.Item {
-  category: string;
-  priority: number;
-}
-
-interface SampleEvent extends EventGrid.Event {
-  score: number;
-  note?: string;
-}
-
-interface SampleData {
-  columns: SampleColumn[];
-  rows: SampleRow[];
-  events: SampleEvent[];
-}
-
-declare global {
-  interface Window {
-    EventGridSampleData: SampleData;
-  }
-}
-
-const sample = window.EventGridSampleData;
+import sample, { SampleColumn, SampleEvent, SampleRow } from './data/sample-data';
 
 function element<TElement extends HTMLElement>(id: string): TElement {
   const found = document.getElementById(id);
@@ -37,25 +8,13 @@ function element<TElement extends HTMLElement>(id: string): TElement {
   return found as TElement;
 }
 
-function sortNumber(field: string) {
-  return (a: SampleColumn | SampleRow, b: SampleColumn | SampleRow) =>
-    Number(b[field]) - Number(a[field]);
+function sortNumber<TItem extends EventGrid.Item>(getValue: EventGrid.TrackValueGetter<TItem>) {
+  return (a: TItem, b: TItem) => Number(getValue(b)) - Number(getValue(a));
 }
 
-function sortText(field: string) {
-  return (a: SampleColumn | SampleRow, b: SampleColumn | SampleRow) =>
-    String(a[field]).localeCompare(String(b[field]));
-}
-
-function trackFill(data: EventGrid.TrackItem): string {
-  if (data.fieldName === 'capacity') {
-    const value = Number(data.value);
-    return value >= 75 ? '#2e7d32' : value >= 55 ? '#66bb6a' : '#c8e6c9';
-  }
-  if (data.fieldName === 'priority') {
-    return ['#eceff1', '#cfd8dc', '#b0bec5', '#90a4ae', '#78909c'][Number(data.value) - 1];
-  }
-  return '#b3e5fc';
+function sortText<TItem extends EventGrid.Item>(getValue: EventGrid.TrackValueGetter<TItem>) {
+  return (a: TItem, b: TItem) =>
+    String(getValue(a)).localeCompare(String(getValue(b)));
 }
 
 const grid = new EventGrid<SampleColumn, SampleRow, SampleEvent>({
@@ -70,15 +29,13 @@ const grid = new EventGrid<SampleColumn, SampleRow, SampleEvent>({
   eventStacking: 'v',
   trackHeight: 12,
   columnTracks: [
-    { name: 'Capacity', fieldName: 'capacity', type: 'number', group: 'Column metadata', sort: sortNumber },
-    { name: 'Group', fieldName: 'group', type: 'text', group: 'Column metadata', sort: sortText }
+    { id: 'capacity', label: 'Capacity', field: 'capacity', fill: '#2e7d32', type: 'number', group: 'Column metadata', sort: sortNumber },
+    { id: 'group', label: 'Group', field: (column) => column.metadata.group, colorPalette: ['#1565c0', '#ef6c00', '#6a1b9a'], type: 'text', group: 'Column metadata', sort: sortText }
   ],
   rowTracks: [
-    { name: 'Priority', fieldName: 'priority', type: 'number', group: 'Row metadata', sort: sortNumber },
-    { name: 'Category', fieldName: 'category', type: 'text', group: 'Row metadata', sort: sortText }
-  ],
-  columnFillFunc: trackFill,
-  rowFillFunc: trackFill
+    { id: 'priority', label: 'Priority', field: 'priority', fill: '#607d8b', type: 'number', group: 'Row metadata', sort: sortNumber },
+    { id: 'category', label: 'Category', field: (row) => row.metadata.category, colorMap: { Quality: '#c62828' }, type: 'text', group: 'Row metadata', sort: sortText }
+  ]
 });
 
 grid.types.forEach((type) => {

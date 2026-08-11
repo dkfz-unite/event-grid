@@ -54,7 +54,6 @@ class ColumnHistogram {
   items: PositionedColumn[];
   events: PositionedEvent[];
   stats: ColumnEventStat[] = [];
-  width: number;
   histogramWidth: number;
   barWidth: number;
   topCount = 1;
@@ -78,8 +77,7 @@ class ColumnHistogram {
     this.events = params.events || [];
     this.summaryEventTypes = params.summaryEventTypes || params.types || [];
     this.colorMap = params.colorMap || {};
-    this.width = params.width || 500;
-    this.histogramWidth = this.width;
+    this.histogramWidth = params.width || 500;
     this.barWidth = this.items.length ? this.histogramWidth / this.items.length : 0;
     this.totalHeight = this.histogramHeight + this.lineHeightOffset + this.padding;
   }
@@ -161,7 +159,6 @@ class ColumnHistogram {
   }
 
   resize(width: number): void {
-    this.width = width;
     this.histogramWidth = width;
     this.barWidth = this.items.length ? this.histogramWidth / this.items.length : 0;
     if (!this.container) return;
@@ -216,9 +213,6 @@ class ColumnHistogram {
       .attr('y', -this.lineHeightOffset - this.padding);
   }
 
-  destroy(): void {
-    if (this.container) this.container.remove();
-  }
 }
 
 export default ColumnHistogram;

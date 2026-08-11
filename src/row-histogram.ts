@@ -197,9 +197,6 @@ class RowHistogram {
     this.renderBars();
   }
 
-  destroy(): void {
-    if (this.container) this.container.remove();
-  }
 }
 
 export default RowHistogram;

@@ -5,9 +5,6 @@ import {
   InternalTrack,
   PositionedColumn,
   PositionedRow,
-  ResizeCallback,
-  TrackFillCallback,
-  TrackOpacityCallback,
   UpdateCallback
 } from './internal-types';
 
@@ -17,14 +14,8 @@ class Track {
   readonly svg: D3Selection;
   readonly rotated: boolean;
   readonly updateCallback: UpdateCallback;
-  readonly resizeCallback: ResizeCallback;
-  readonly expandableGroups: string[];
-  readonly trackLegendLabel: string;
   readonly cellHeight: number;
   readonly availableTracks: InternalTrack[];
-  readonly opacityFunc: TrackOpacityCallback;
-  readonly fillFunc: TrackFillCallback;
-  readonly nullSentinel: unknown;
   readonly padding: number;
 
   offset: number;
@@ -41,11 +32,8 @@ class Track {
     svg: D3Selection,
     rotated: boolean,
     tracks: InternalTrack[] | undefined,
-    opacityFunc: TrackOpacityCallback | undefined,
-    fillFunc: TrackFillCallback | undefined,
     updateCallback: UpdateCallback,
-    offset: number,
-    resizeCallback: ResizeCallback
+    offset: number
   ) {
     this.emit = params.emit;
     this.padding = params.trackPadding ?? 20;
@@ -54,17 +42,11 @@ class Track {
     this.svg = svg;
     this.rotated = rotated;
     this.updateCallback = updateCallback;
-    this.resizeCallback = resizeCallback;
-    this.expandableGroups = params.expandableGroups || [];
-    this.trackLegendLabel = params.trackLegendLabel || '';
     this.domain = rotated ? params.rows : params.columns;
     this.width = (rotated ? params.height : params.width) || 500;
     this.cellHeight = params.trackHeight ?? 10;
     this.availableTracks = tracks || [];
-    this.opacityFunc = opacityFunc || (() => 1);
-    this.fillFunc = fillFunc || (() => '#6d72c5');
     this.drawGridLines = params.grid || false;
-    this.nullSentinel = params.nullSentinel ?? -777;
     this.parseGroups();
   }
 
@@ -83,12 +65,8 @@ class Track {
         cellHeight: this.cellHeight,
         width: this.width,
         grid: this.drawGridLines,
-        nullSentinel: this.nullSentinel,
-        domain: this.domain,
-        trackLegendLabel: this.trackLegendLabel,
-        expandable: this.expandableGroups.indexOf(groupName) >= 0
-      }, groupName, this.rotated, this.opacityFunc, this.fillFunc,
-      this.updateCallback, this.resizeCallback);
+        domain: this.domain
+      }, groupName, this.rotated, this.updateCallback);
       group.addTrack(track);
       this.groupMap[groupName] = group;
       this.groups.push(group);
@@ -104,7 +82,7 @@ class Track {
       const trackContainer = this.container.append('g')
         .attr('transform', `translate(0,${this.height})`);
       group.init(trackContainer);
-      this.height += Number(group.totalHeight) + this.padding;
+      this.height += Number(group.height) + this.padding;
     });
 
     const translateDown = this.rotated ? -(this.offset + this.height) : this.padding + this.offset;
@@ -129,7 +107,7 @@ class Track {
     this.groups.forEach((group) => {
       group.container.attr('transform', `translate(0,${this.height})`);
       group.resize(this.width);
-      this.height += Number(group.totalHeight) + this.padding;
+      this.height += Number(group.height) + this.padding;
     });
 
     const translateDown = this.rotated ? -(this.offset + this.height) : this.padding + this.offset;

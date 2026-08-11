@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import defaultColorPalette from './default-color-palette';
 import { EVENT_GRID_EVENTS } from './event-names';
 import {
   D3Scale,
@@ -6,44 +7,64 @@ import {
   InternalTrack,
   PositionedColumn,
   PositionedRow,
-  ResizeCallback,
   TrackData,
-  TrackFillCallback,
   TrackGroupOptions,
-  TrackOpacityCallback,
   UpdateCallback,
   idKey
 } from './internal-types';
 
+const DEFAULT_TRACK_FILL = '#6d72c5';
+const MIN_NUMERIC_OPACITY = 0.2;
+
+function valueGetter(track: InternalTrack): (item: PositionedColumn | PositionedRow) => unknown {
+  return typeof track.field === 'function'
+    ? track.field
+    : (item) => item[track.field as string];
+}
+
+function trackValue(track: InternalTrack, item: PositionedColumn | PositionedRow): unknown {
+  return typeof track.field === 'function' ? track.field(item) : item[track.field];
+}
+
+function safeClass(value: unknown): string {
+  return String(value).replace(/[^a-zA-Z0-9_-]/g, '-');
+}
+
+function numericValue(value: unknown): number | undefined {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined;
+  if (typeof value !== 'string' || value.trim() === '') return undefined;
+  const converted = Number(value);
+  return Number.isFinite(converted) ? converted : undefined;
+}
+
+function clampOpacity(value: number): number {
+  if (!Number.isFinite(value)) return 1;
+  return Math.max(0, Math.min(1, value));
+}
+
+function hasColor(map: Record<string, string> | undefined, key: string): boolean {
+  return Boolean(map && Object.prototype.hasOwnProperty.call(map, key));
+}
+
 class TrackGroup {
   readonly emit;
   readonly prefix: string;
-  readonly expandable: boolean;
   readonly name: string;
   readonly cellHeight: number;
-  readonly nullSentinel: unknown;
   readonly rotated: boolean;
   readonly updateCallback: UpdateCallback;
-  readonly resizeCallback: ResizeCallback;
-  readonly trackLegendLabel: string;
-  readonly opacityFunc: TrackOpacityCallback;
-  readonly fillFunc: TrackFillCallback;
 
   width: number;
   height = 0;
-  totalHeight = 0;
   length = 0;
-  rendered = false;
   drawGridLines: boolean;
   domain: Array<PositionedColumn | PositionedRow>;
   numDomain: number;
   tracks: InternalTrack[] = [];
-  collapsedTracks: InternalTrack[] = [];
   trackData: TrackData[] = [];
   cellWidth = 0;
 
   container: D3Selection;
-  legend: D3Selection;
   background: D3Selection;
   column: D3Selection;
   row: D3Selection;
@@ -53,82 +74,114 @@ class TrackGroup {
     params: TrackGroupOptions,
     name: string,
     rotated: boolean,
-    opacityFunc: TrackOpacityCallback,
-    fillFunc: TrackFillCallback,
-    updateCallback: UpdateCallback,
-    resizeCallback: ResizeCallback
+    updateCallback: UpdateCallback
   ) {
     this.emit = params.emit;
     this.prefix = params.prefix || 'eg-';
-    this.expandable = params.expandable;
     this.name = name;
     this.cellHeight = params.cellHeight || 20;
     this.width = params.width;
-    this.nullSentinel = params.nullSentinel;
     this.rotated = rotated;
     this.updateCallback = updateCallback;
-    this.resizeCallback = resizeCallback;
-    this.trackLegendLabel = params.trackLegendLabel;
-    this.opacityFunc = opacityFunc;
-    this.fillFunc = fillFunc;
     this.drawGridLines = params.grid || false;
     this.domain = params.domain;
     this.numDomain = this.domain.length;
   }
 
-  addTrack(input: InternalTrack | InternalTrack[]): void {
-    const incoming = Array.isArray(input) ? input : [input];
-    incoming.forEach((track) => {
-      if (!this.rendered && track.collapsed && this.expandable) {
-        this.collapsedTracks.push(track);
-      } else {
-        this.tracks.push(track);
-      }
-    });
-
-    this.collapsedTracks = this.collapsedTracks.filter((collapsed) =>
-      !this.tracks.some((track) => collapsed.fieldName === track.fieldName));
-
-    const fields: Record<string, boolean> = {};
-    this.tracks = this.tracks.filter((track) => {
-      if (fields[track.fieldName]) return false;
-      fields[track.fieldName] = true;
-      return true;
-    });
-
+  addTrack(track: InternalTrack): void {
+    if (this.tracks.some((existing) => idKey(existing.id) === idKey(track.id))) return;
+    this.tracks.push(track);
     this.length = this.tracks.length;
     this.height = this.cellHeight * this.length;
-    if (this.rendered) {
-      this.refreshData();
-      this.resizeCallback();
-    }
-  }
-
-  removeTrack(index: number): void {
-    const removed = this.tracks.splice(index, 1);
-    this.collapsedTracks = this.collapsedTracks.concat(removed);
-    this.length = this.tracks.length;
-    this.refreshData();
-    this.resizeCallback();
   }
 
   refreshData(): void {
     this.trackData = [];
     this.domain.forEach((item, domainIndex) => {
       this.tracks.forEach((track) => {
-        const value = item[track.fieldName];
-        const isNullSentinel = value === this.nullSentinel;
+        const value = trackValue(track, item);
+        const available = value !== null;
         this.trackData.push({
           id: item.id,
           label: typeof item.label === 'undefined' ? String(item.id) : item.label,
           domainIndex,
           value,
-          valueLabel: isNullSentinel ? 'Not available' : value,
-          notNullSentinel: !isNullSentinel,
-          trackLabel: track.name,
-          fieldName: track.fieldName,
+          valueLabel: available ? value : 'Not available',
+          available,
+          fill: DEFAULT_TRACK_FILL,
+          opacity: 1,
+          trackId: track.id,
+          trackLabel: track.label,
+          field: track.field,
           type: track.type
         });
+      });
+    });
+    this.applyStyles();
+  }
+
+  private applyStyles(): void {
+    this.tracks.forEach((track) => {
+      const items = this.trackData.filter((item) => idKey(item.trackId) === idKey(track.id));
+      const available = items.filter((item) => item.available &&
+        typeof item.value !== 'undefined' && item.value !== '');
+      const numericValues = available.map((item) => numericValue(item.value));
+      const numeric = track.type === 'number' ||
+        (numericValues.length > 0 && numericValues.every((value) => typeof value === 'number'));
+      const hasCustomPalette = Boolean(track.colorPalette && track.colorPalette.length);
+      const palette = hasCustomPalette
+        ? (track.colorPalette as string[]).slice()
+        : defaultColorPalette.slice();
+      const usePalette = !track.fill && (!numeric || hasCustomPalette);
+      const generatedColors: Record<string, string> = Object.create(null) as Record<string, string>;
+      let colorIndex = 0;
+
+      items.forEach((item) => {
+        const key = String(item.value);
+        if (hasColor(track.colorMap, key)) {
+          item.fill = (track.colorMap as Record<string, string>)[key];
+        } else if (track.fill) {
+          item.fill = track.fill;
+        } else if (usePalette) {
+          if (!generatedColors[key]) {
+            generatedColors[key] = palette[colorIndex % palette.length];
+            colorIndex += 1;
+          }
+          item.fill = generatedColors[key];
+        } else {
+          item.fill = DEFAULT_TRACK_FILL;
+        }
+      });
+
+      if (track.opacityFunction) {
+        items.forEach((item) => {
+          item.opacity = clampOpacity(Number(track.opacityFunction?.(item)));
+        });
+        return;
+      }
+
+      if (!numeric) {
+        items.forEach((item) => {
+          if (!item.available) item.opacity = MIN_NUMERIC_OPACITY;
+        });
+        return;
+      }
+      const finiteValues: number[] = [];
+      numericValues.forEach((value) => {
+        if (typeof value === 'number') finiteValues.push(value);
+      });
+      const minimum = finiteValues.length ? Math.min(...finiteValues) : 0;
+      const maximum = finiteValues.length ? Math.max(...finiteValues) : 0;
+      items.forEach((item) => {
+        const value = item.available ? numericValue(item.value) : undefined;
+        if (typeof value === 'undefined') {
+          item.opacity = MIN_NUMERIC_OPACITY;
+        } else if (minimum === maximum) {
+          item.opacity = 1;
+        } else {
+          item.opacity = MIN_NUMERIC_OPACITY +
+            (1 - MIN_NUMERIC_OPACITY) * (value - minimum) / (maximum - minimum);
+        }
       });
     });
   }
@@ -143,29 +196,17 @@ class TrackGroup {
       .attr('class', `${this.prefix}track-group-label`)
       .text(this.name);
 
-    const legendObject = this.container.append('svg:foreignObject').attr('width', 20).attr('height', 20);
-    this.legend = legendObject
-      .attr('x', 0)
-      .attr('y', -22)
-      .append('xhtml:div')
-      .html(this.trackLegendLabel);
-
     this.background = this.container.append('rect')
       .attr('class', 'background')
       .attr('width', this.width)
       .attr('height', this.height);
     this.refreshData();
-    this.totalHeight = this.height + (this.collapsedTracks.length ? this.cellHeight : 0);
   }
 
   render(): void {
-    this.rendered = true;
     this.computeCoordinates();
     this.cellWidth = this.domain.length ? this.width / this.domain.length : 0;
     this.renderData();
-    this.legend
-      .on('mouseover', () => this.emit(EVENT_GRID_EVENTS.trackLegendMouseOver, { group: this.name }))
-      .on('mouseout', () => this.emit(EVENT_GRID_EVENTS.trackLegendMouseOut));
   }
 
   update(domain: Array<PositionedColumn | PositionedRow>): void {
@@ -175,21 +216,9 @@ class TrackGroup {
       this.cellWidth = this.numDomain ? this.width / this.numDomain : 0;
     }
 
-    const positions: Record<string, number> = {};
-    domain.forEach((item, index) => { positions[idKey(item.id)] = index; });
-    this.trackData = this.trackData.filter((data) => {
-      const domainIndex = positions[idKey(data.id)];
-      if (typeof domainIndex === 'undefined') return false;
-      data.domainIndex = domainIndex;
-      return true;
-    });
-
+    this.refreshData();
     this.computeCoordinates();
-    this.container.selectAll(`.${this.prefix}track-data`)
-      .data(this.trackData)
-      .attr('x', (data: TrackData) => this.itemPosition(this.domain[data.domainIndex]))
-      .attr('data-track-data-index', (_data: TrackData, index: number) => index)
-      .attr('width', this.cellWidth);
+    this.renderData();
   }
 
   resize(width: number): void {
@@ -198,7 +227,6 @@ class TrackGroup {
     this.cellWidth = this.domain.length ? this.width / this.domain.length : 0;
     this.background.attr('class', 'background').attr('width', this.width).attr('height', this.height);
     this.computeCoordinates();
-    this.totalHeight = this.height + (this.collapsedTracks.length ? this.cellHeight : 0);
     this.renderData();
   }
 
@@ -233,7 +261,7 @@ class TrackGroup {
       .attr('class', `${this.prefix}track-label ${this.prefix}label-text-font`)
       .on('click', (_domEvent: MouseEvent, track: InternalTrack) => {
         if (!track.sort) return;
-        this.domain.sort(track.sort(track.fieldName));
+        this.domain.sort(track.sort(valueGetter(track)));
         this.updateCallback(false);
       })
       .transition()
@@ -241,53 +269,7 @@ class TrackGroup {
       .attr('y', this.cellHeight / 2)
       .attr('dy', '.32em')
       .attr('text-anchor', 'end')
-      .text((track: InternalTrack) => track.name);
-
-    if (this.expandable) this.renderRemoveTrackButtons(labels);
-    this.renderAddTrackButton();
-  }
-
-  private renderRemoveTrackButtons(labels: D3Selection): void {
-    setTimeout(() => {
-      const className = `${this.prefix}remove-track`;
-      this.container.selectAll(`.${className}`).remove();
-      const textLengths: Record<string, number> = {};
-      labels.each(function (this: SVGTextElement, track: InternalTrack) {
-        textLengths[track.name] = this.getComputedTextLength();
-      });
-      this.row.append('text')
-        .attr('class', className)
-        .text('-')
-        .attr('y', this.cellHeight / 2)
-        .attr('dy', '.32em')
-        .on('click', (_domEvent: MouseEvent, track: InternalTrack) =>
-          this.removeTrack(this.tracks.indexOf(track)))
-        .attr('x', function (this: SVGTextElement, track: InternalTrack) {
-          return -(textLengths[track.name] + 12 + this.getComputedTextLength());
-        });
-    });
-  }
-
-  private renderAddTrackButton(): void {
-    let addButton = this.container.selectAll(`.${this.prefix}add-track`);
-    if (this.collapsedTracks.length && this.expandable) {
-      if (addButton.empty()) {
-        addButton = this.container.append('text')
-          .text('+')
-          .attr('class', `${this.prefix}add-track`)
-          .attr('x', -6)
-          .attr('dy', '.32em')
-          .attr('text-anchor', 'end')
-          .on('click', () => this.emit(EVENT_GRID_EVENTS.addTrackClick, {
-            hiddenTracks: this.collapsedTracks.slice(),
-            addTrack: this.addTrack.bind(this)
-          }));
-      }
-      addButton.attr('y', this.cellHeight / 2 +
-        (this.length ? this.cellHeight + (this.y(this.length - 1) ?? 0) : 0));
-    } else {
-      addButton.remove();
-    }
+      .text((track: InternalTrack) => track.label);
   }
 
   setGridLines(active: boolean): void {
@@ -301,19 +283,21 @@ class TrackGroup {
     const merged = selection.enter().append('rect').merge(selection);
 
     const yIndexLookup: Record<string, number> = {};
-    this.tracks.forEach((track, index) => { yIndexLookup[track.fieldName] = index; });
+    this.tracks.forEach((track, index) => { yIndexLookup[idKey(track.id)] = index; });
     this.bindDataInteractions();
 
     merged
       .attr('data-track-data-index', (_data: TrackData, index: number) => index)
+      .attr('data-track-id', (data: TrackData) => data.trackId)
       .attr('x', (data: TrackData) => this.itemPosition(this.domain[data.domainIndex]))
-      .attr('y', (data: TrackData) => this.y(yIndexLookup[data.fieldName]) ?? 0)
+      .attr('y', (data: TrackData) => this.y(yIndexLookup[idKey(data.trackId)]) ?? 0)
       .attr('width', this.cellWidth)
       .attr('height', this.cellHeight)
-      .attr('fill', this.fillFunc)
-      .attr('opacity', this.opacityFunc)
+      .attr('fill', (data: TrackData) => data.fill)
+      .attr('opacity', (data: TrackData) => data.opacity)
       .attr('class', (data: TrackData) =>
-        `${this.prefix}track-data ${this.prefix}track-${data.fieldName} ${this.prefix}track-${data.value}`);
+        `${this.prefix}track-data ${this.prefix}track-${safeClass(data.trackId)} ` +
+        `${this.prefix}track-value-${safeClass(data.value)}`);
     selection.exit().remove();
   }
 

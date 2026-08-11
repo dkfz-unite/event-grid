@@ -2,6 +2,9 @@ import EventGrid from '@dkfz-unite/event-grid';
 
 interface ProjectColumn extends EventGrid.Item {
   owner: string;
+  metadata: {
+    customField: number;
+  };
 }
 
 interface ProjectRow extends EventGrid.Item {
@@ -13,9 +16,27 @@ interface ProjectEvent extends EventGrid.Event {
 }
 
 const grid = new EventGrid<ProjectColumn, ProjectRow, ProjectEvent>({
-  columns: [{ id: 'c1', owner: 'Avery' }],
+  columns: [{ id: 'c1', owner: 'Avery', metadata: { customField: 4 } }],
   rows: [{ id: 'r1', priority: 1 }],
   events: [{ id: 'e1', columnId: 'c1', rowId: 'r1', type: 'active', note: 'Typed metadata' }],
+  columnTracks: [
+    {
+      id: 'owner',
+      label: 'Owner',
+      field: 'owner',
+      colorPalette: ['#123456', '#654321']
+    },
+    {
+      id: 'custom-field',
+      label: 'Custom field',
+      field: (column) => column.metadata.customField,
+      fill: '#123456',
+      opacityFunction: (data) => Number(data.value) / 10,
+      colorMap: { '4': '#654321' },
+      sort: (getValue) => (a, b) => Number(getValue(a)) - Number(getValue(b))
+    }
+  ],
+  rowTracks: [{ id: 'priority', label: 'Priority', field: 'priority' }],
   sortByFrequency: true,
   eventStacking: 'v'
 });

@@ -13,7 +13,6 @@ export type D3Selection = any;
 export type D3Scale = ScaleBand<number>;
 export type Emit = (eventName: EventGridEventName, payload?: unknown) => boolean;
 export type UpdateCallback = (sortColumns?: boolean) => void;
-export type ResizeCallback = () => void;
 
 export interface PositionedColumn extends GridItem {
   x: number;
@@ -61,9 +60,11 @@ export interface RowEventStat {
   [eventType: string]: PositionedRow | number;
 }
 
-export interface TrackData extends TrackItemPayload {
+export interface TrackData extends TrackItemPayload<PositionedColumn | PositionedRow> {
   domainIndex: number;
-  notNullSentinel: boolean;
+  available: boolean;
+  fill: string;
+  opacity: number;
 }
 
 export interface TrackGroupOptions {
@@ -72,15 +73,10 @@ export interface TrackGroupOptions {
   cellHeight: number;
   width: number;
   grid: boolean;
-  nullSentinel: unknown;
   domain: Array<PositionedColumn | PositionedRow>;
-  trackLegendLabel: string;
-  expandable: boolean;
 }
 
 export type InternalTrack = TrackDefinition<PositionedColumn | PositionedRow>;
-export type TrackFillCallback = (data: TrackData) => string;
-export type TrackOpacityCallback = (data: TrackData) => number;
 
 export function idKey(id: GridId): string {
   return String(id);

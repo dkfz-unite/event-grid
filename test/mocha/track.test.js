@@ -3,28 +3,118 @@ var expect = chai.expect;
 
 describe('Tracks', function () {
   function dispatch(target, name) {
-    var event = document.createEvent('MouseEvents');
-    event.initEvent(name, true, true);
-    target.dispatchEvent(event);
+    target.dispatchEvent(new MouseEvent(name, { bubbles: true, cancelable: true }));
   }
 
   it('reads arbitrary metadata from columns and rows', function () {
     var grid = new EventGrid({
       element: '#test6',
-      columns: [{ id: 'c1', label: 'Alpha', owner: 'Avery' }, { id: 'c2', label: 'Beta', owner: 'Blake' }],
+      columns: [
+        { id: 'c1', label: 'Alpha', metadata: { owner: 'Avery' } },
+        { id: 'c2', label: 'Beta', metadata: { owner: 'Blake' } }
+      ],
       rows: [{ id: 'r1', label: 'First', priority: 2 }],
       events: [{ id: 'e1', columnId: 'c1', rowId: 'r1', type: 'ok' }],
-      columnTracks: [{ name: 'Owner', fieldName: 'owner', type: 'text' }],
-      rowTracks: [{ name: 'Priority', fieldName: 'priority', type: 'number' }],
-      columnFillFunc: function () { return '#123456'; },
-      rowFillFunc: function () { return '#654321'; }
+      columnTracks: [{
+        id: 'owner',
+        label: 'Owner',
+        field: function (column) { return column.metadata.owner; },
+        fill: '#123456',
+        type: 'text'
+      }],
+      rowTracks: [{
+        id: 'priority',
+        label: 'Priority',
+        field: 'priority',
+        fill: '#654321',
+        type: 'number'
+      }]
     });
     grid.render();
 
     var trackCells = document.querySelectorAll('#test6 .eg-track-data');
     expect(trackCells.length).to.equal(3);
     expect(grid.mainGrid.columnTrack.groups[0].trackData[0].label).to.equal('Alpha');
+    expect(grid.mainGrid.columnTrack.groups[0].trackData[0].value).to.equal('Avery');
+    expect(grid.mainGrid.columnTrack.groups[0].trackData[0].fill).to.equal('#123456');
     expect(grid.mainGrid.rowTrack.groups[0].trackData[0].value).to.equal(2);
+    expect(grid.mainGrid.rowTrack.groups[0].trackData[0].fill).to.equal('#654321');
+    grid.destroy();
+  });
+
+  it('scales numeric and numeric-string values through the default opacity range', function () {
+    var grid = new EventGrid({
+      element: '#test6',
+      columns: [
+        { id: 'c1', metric: '10' },
+        { id: 'c2', metric: '20' },
+        { id: 'c3', metric: 15 }
+      ],
+      rows: [],
+      events: [],
+      columnTracks: [{ id: 'score', label: 'Score', field: 'metric' }]
+    });
+    grid.render();
+
+    var data = grid.mainGrid.columnTrack.groups[0].trackData;
+    expect(data.map(function (item) { return item.fill; })).to.deep.equal([
+      '#6d72c5', '#6d72c5', '#6d72c5'
+    ]);
+    expect(data[0].opacity).to.equal(0.2);
+    expect(data[1].opacity).to.equal(1);
+    expect(data[2].opacity).to.be.closeTo(0.6, 0.000001);
+    grid.destroy();
+  });
+
+  it('uses null as the unavailable track value without reserving numeric sentinels', function () {
+    var grid = new EventGrid({
+      element: '#test6',
+      columns: [
+        { id: 'c1', metric: null },
+        { id: 'c2', metric: -777 }
+      ],
+      rows: [],
+      events: [],
+      columnTracks: [{ id: 'metric', label: 'Metric', field: 'metric' }]
+    });
+    grid.render();
+
+    var data = grid.mainGrid.columnTrack.groups[0].trackData;
+    var missing = data.find(function (item) { return item.id === 'c1'; });
+    var negative = data.find(function (item) { return item.id === 'c2'; });
+    expect(missing.valueLabel).to.equal('Not available');
+    expect(missing.opacity).to.equal(0.2);
+    expect(negative.valueLabel).to.equal(-777);
+    expect(negative.opacity).to.equal(1);
+    grid.destroy();
+  });
+
+  it('maps categorical values through palettes, maps, and custom opacity', function () {
+    var grid = new EventGrid({
+      element: '#test6',
+      columns: [
+        { id: 'c1', status: 'ready' },
+        { id: 'c2', status: 'blocked' },
+        { id: 'c3', status: 'ready' }
+      ],
+      rows: [],
+      events: [],
+      columnTracks: [{
+        id: 'status',
+        label: 'Status',
+        field: 'status',
+        colorPalette: ['#111111', '#222222'],
+        colorMap: { blocked: '#ff0000' },
+        opacityFunction: function (item) { return item.value === 'ready' ? 0.4 : 1; }
+      }]
+    });
+    grid.render();
+
+    var data = grid.mainGrid.columnTrack.groups[0].trackData;
+    expect(data.map(function (item) { return item.fill; })).to.deep.equal([
+      '#111111', '#ff0000', '#111111'
+    ]);
+    expect(data.map(function (item) { return item.opacity; })).to.deep.equal([0.4, 1, 0.4]);
     grid.destroy();
   });
 
@@ -34,8 +124,8 @@ describe('Tracks', function () {
       columns: [{ id: 'c1', owner: 'Avery' }],
       rows: [{ id: 'r1', priority: 2 }],
       events: [],
-      columnTracks: [{ name: 'Owner', fieldName: 'owner', type: 'text' }],
-      rowTracks: [{ name: 'Priority', fieldName: 'priority', type: 'number' }]
+      columnTracks: [{ id: 'owner', label: 'Owner', field: 'owner', type: 'text' }],
+      rowTracks: [{ id: 'priority', label: 'Priority', field: 'priority', type: 'number' }]
     });
     var columnHover;
     var columnClick;
@@ -56,9 +146,11 @@ describe('Tracks', function () {
     dispatch(rowCell, 'click');
 
     expect(columnHover.axis).to.equal('column');
-    expect(columnClick.item.fieldName).to.equal('owner');
+    expect(columnClick.item.trackId).to.equal('owner');
+    expect(columnClick.item.trackLabel).to.equal('Owner');
+    expect(columnClick.item.field).to.equal('owner');
     expect(rowHover.axis).to.equal('row');
-    expect(rowClick.item.fieldName).to.equal('priority');
+    expect(rowClick.item.trackId).to.equal('priority');
     grid.destroy();
   });
 
@@ -66,17 +158,18 @@ describe('Tracks', function () {
     var grid = new EventGrid({
       element: '#test6',
       columns: [
-        { id: 'c1', owner: 'Blake' },
-        { id: 'c2', owner: 'Avery' }
+        { id: 'c1', metadata: { owner: 'Blake' } },
+        { id: 'c2', metadata: { owner: 'Avery' } }
       ],
       rows: [{ id: 'r1' }],
       events: [],
       columnTracks: [{
-        name: 'Owner',
-        fieldName: 'owner',
-        sort: function (fieldName) {
+        id: 'owner',
+        label: 'Owner',
+        field: function (column) { return column.metadata.owner; },
+        sort: function (getValue) {
           return function (first, second) {
-            return String(first[fieldName]).localeCompare(String(second[fieldName]));
+            return String(getValue(first)).localeCompare(String(getValue(second)));
           };
         }
       }]

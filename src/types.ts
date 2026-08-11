@@ -18,22 +18,30 @@ export interface GridEvent {
   [metadata: string]: unknown;
 }
 
+export type TrackValueGetter<TItem extends GridItem = GridItem> = (item: TItem) => unknown;
+export type TrackField<TItem extends GridItem = GridItem> = string | TrackValueGetter<TItem>;
+
 export interface TrackDefinition<TItem extends GridItem = GridItem> {
-  name: string;
-  fieldName: string;
+  id: GridId;
+  label: string;
+  field: TrackField<TItem>;
+  fill?: string;
+  opacityFunction?: (data: TrackItemPayload<TItem>) => number;
+  colorPalette?: string[];
+  colorMap?: Record<string, string>;
   type?: string;
   group?: string;
-  collapsed?: boolean;
-  sort?: (fieldName: string) => (a: TItem, b: TItem) => number;
+  sort?: (getValue: TrackValueGetter<TItem>) => (a: TItem, b: TItem) => number;
 }
 
-export interface TrackItemPayload {
+export interface TrackItemPayload<TItem extends GridItem = GridItem> {
   id: GridId;
   label: string;
   value: unknown;
   valueLabel: unknown;
+  trackId: GridId;
   trackLabel: string;
-  fieldName: string;
+  field: TrackField<TItem>;
   type?: string;
 }
 
@@ -56,9 +64,12 @@ export interface ColumnHistogramPayload<TColumn extends GridItem = GridItem> {
   count: number;
 }
 
-export interface TrackPayload<TAxis extends Axis = Axis> {
+export interface TrackPayload<
+  TAxis extends Axis = Axis,
+  TItem extends GridItem = GridItem
+> {
   axis: TAxis;
-  item: TrackItemPayload;
+  item: TrackItemPayload<TItem>;
 }
 
 export interface RowHistogramPayload<TRow extends GridItem = GridItem> {
@@ -97,15 +108,8 @@ export interface EventGridOptions<
   histogramBorderPadding?: { left?: number; bottom?: number };
   columnTracks?: Array<TrackDefinition<TColumn>>;
   rowTracks?: Array<TrackDefinition<TRow>>;
-  columnOpacityFunc?: (data: TrackItemPayload) => number;
-  rowOpacityFunc?: (data: TrackItemPayload) => number;
-  columnFillFunc?: (data: TrackItemPayload) => string;
-  rowFillFunc?: (data: TrackItemPayload) => string;
   trackHeight?: number;
   trackPadding?: number;
-  trackLegendLabel?: string;
-  expandableGroups?: string[];
-  nullSentinel?: unknown;
 }
 
 export interface EventGridEventMap<
@@ -124,18 +128,12 @@ export interface EventGridEventMap<
   [EVENT_GRID_EVENTS.rowHistogramClick]: RowHistogramPayload<TRow>;
   [EVENT_GRID_EVENTS.rowHistogramMouseOver]: RowHistogramPayload<TRow>;
   [EVENT_GRID_EVENTS.rowHistogramMouseOut]: { axis: 'row' };
-  [EVENT_GRID_EVENTS.columnTrackClick]: TrackPayload<'column'>;
-  [EVENT_GRID_EVENTS.columnTrackMouseOver]: TrackPayload<'column'>;
+  [EVENT_GRID_EVENTS.columnTrackClick]: TrackPayload<'column', TColumn>;
+  [EVENT_GRID_EVENTS.columnTrackMouseOver]: TrackPayload<'column', TColumn>;
   [EVENT_GRID_EVENTS.columnTrackMouseOut]: { axis: 'column' };
-  [EVENT_GRID_EVENTS.rowTrackClick]: TrackPayload<'row'>;
-  [EVENT_GRID_EVENTS.rowTrackMouseOver]: TrackPayload<'row'>;
+  [EVENT_GRID_EVENTS.rowTrackClick]: TrackPayload<'row', TRow>;
+  [EVENT_GRID_EVENTS.rowTrackMouseOver]: TrackPayload<'row', TRow>;
   [EVENT_GRID_EVENTS.rowTrackMouseOut]: { axis: 'row' };
-  [EVENT_GRID_EVENTS.trackLegendMouseOver]: { group: string };
-  [EVENT_GRID_EVENTS.trackLegendMouseOut]: void;
-  [EVENT_GRID_EVENTS.addTrackClick]: {
-    hiddenTracks: Array<TrackDefinition<TColumn | TRow>>;
-    addTrack: (track: TrackDefinition<TColumn | TRow>) => void;
-  };
   [EVENT_GRID_EVENTS.renderAllStart]: void;
   [EVENT_GRID_EVENTS.renderAllEnd]: void;
   [EVENT_GRID_EVENTS.renderMainGridStart]: void;

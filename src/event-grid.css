@@ -41,9 +41,7 @@
 }
 
 .eg-label-text-font,
-.eg-track-group-label,
-.eg-add-track,
-.eg-remove-track {
+.eg-track-group-label {
     fill: #334e68;
     font-family: inherit;
     user-select: none;
@@ -63,16 +61,8 @@
     cursor: move;
 }
 
-.eg-track-label,
-.eg-add-track,
-.eg-remove-track {
+.eg-track-label {
     cursor: pointer;
-}
-
-.eg-add-track,
-.eg-remove-track {
-    font-size: 0.75rem;
-    font-weight: 700;
 }
 
 .eg-event,
@@ -97,9 +87,4 @@
     stroke-width: 1;
     pointer-events: none;
     shape-rendering: crispEdges;
-}
-
-.eg-highlight {
-    stroke: #0f766e;
-    stroke-width: 1.5;
 }

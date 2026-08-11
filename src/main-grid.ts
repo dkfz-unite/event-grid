@@ -15,7 +15,6 @@ import {
   PositionedColumn,
   PositionedEvent,
   PositionedRow,
-  ResizeCallback,
   UpdateCallback,
   idKey
 } from './internal-types';
@@ -27,7 +26,6 @@ function safeClass(value: unknown): string {
 class MainGrid {
   readonly emit: Emit;
   readonly updateCallback: UpdateCallback;
-  readonly resizeCallback: ResizeCallback;
   readonly scaleToFit: boolean;
   readonly leftTextWidth: number;
   readonly prefix: string;
@@ -75,7 +73,6 @@ class MainGrid {
     params: InternalOptions,
     lookupTable: EventLookup,
     updateCallback: UpdateCallback,
-    resizeCallback: ResizeCallback,
     x: D3Scale,
     y: D3Scale
   ) {
@@ -84,7 +81,6 @@ class MainGrid {
     this.y = y;
     this.lookupTable = lookupTable;
     this.updateCallback = updateCallback;
-    this.resizeCallback = resizeCallback;
 
     this.scaleToFit = typeof params.scaleToFit === 'boolean' ? params.scaleToFit : true;
     this.leftTextWidth = params.leftTextWidth || 80;
@@ -119,11 +115,8 @@ class MainGrid {
       this.container,
       false,
       params.columnTracks as InternalTrack[] | undefined,
-      params.columnOpacityFunc,
-      params.columnFillFunc,
       updateCallback,
-      this.height,
-      this.resizeCallback
+      this.height
     );
     this.columnTrack.init();
     this.rowHistogram = new RowHistogram(params, this.container, this.events, this.width);
@@ -132,11 +125,8 @@ class MainGrid {
       this.container,
       true,
       params.rowTracks as InternalTrack[] | undefined,
-      params.rowOpacityFunc,
-      params.rowFillFunc,
       updateCallback,
-      this.width + this.rowHistogram.totalWidth,
-      this.resizeCallback
+      this.width + this.rowHistogram.totalWidth
     );
     this.rowTrack.init();
   }
