@@ -1,0 +1,33 @@
+export const EVENT_GRID_EVENTS = Object.freeze({
+  gridClick: 'gridClick',
+  gridMouseOver: 'gridMouseOver',
+  gridMouseOut: 'gridMouseOut',
+  gridCrosshairMouseOver: 'gridCrosshairMouseOver',
+  gridCrosshairMouseOut: 'gridCrosshairMouseOut',
+  columnHistogramClick: 'columnHistogramClick',
+  columnHistogramMouseOver: 'columnHistogramMouseOver',
+  columnHistogramMouseOut: 'columnHistogramMouseOut',
+  rowHistogramClick: 'rowHistogramClick',
+  rowHistogramMouseOver: 'rowHistogramMouseOver',
+  rowHistogramMouseOut: 'rowHistogramMouseOut',
+  columnTrackClick: 'columnTrackClick',
+  columnTrackMouseOver: 'columnTrackMouseOver',
+  columnTrackMouseOut: 'columnTrackMouseOut',
+  rowTrackClick: 'rowTrackClick',
+  rowTrackMouseOver: 'rowTrackMouseOver',
+  rowTrackMouseOut: 'rowTrackMouseOut',
+  renderAllStart: 'render:all:start',
+  renderAllEnd: 'render:all:end',
+  renderMainGridStart: 'render:mainGrid:start',
+  renderMainGridEnd: 'render:mainGrid:end',
+  renderColumnHistogramStart: 'render:columnHistogram:start',
+  renderColumnHistogramEnd: 'render:columnHistogram:end',
+  renderRowHistogramStart: 'render:rowHistogram:start',
+  renderRowHistogramEnd: 'render:rowHistogram:end',
+  renderColumnTrackStart: 'render:columnTrack:start',
+  renderColumnTrackEnd: 'render:columnTrack:end',
+  renderRowTrackStart: 'render:rowTrack:start',
+  renderRowTrackEnd: 'render:rowTrack:end'
+} as const);
+
+export type EventGridEventName = typeof EVENT_GRID_EVENTS[keyof typeof EVENT_GRID_EVENTS];
