@@ -42,6 +42,7 @@ class RowHistogram {
   readonly summaryEventTypes: string[];
   readonly colorMap: Record<string, string>;
   readonly lineWidthOffset: number;
+  readonly lineHeightOffset: number;
   readonly histogramWidth: number;
   readonly totalWidth: number;
 
@@ -74,13 +75,15 @@ class RowHistogram {
     this.svg = svgElement;
     this.domain = params.rows || [];
     this.colorMap = params.colorMap || {};
-    this.lineWidthOffset = (params.histogramBorderPadding || {}).left || 10;
+    const borderPadding = params.histogramBorderPadding || {};
+    this.lineWidthOffset = borderPadding.left ?? 20;
+    this.lineHeightOffset = borderPadding.bottom ?? 5;
     const width = params.width || 500;
     this.height = params.height || 500;
     this.offset = typeof offset === 'number' ? offset : width;
     this.histogramWidth = params.rowHistogramWidth || 80;
     this.barHeight = this.domain.length ? this.height / this.domain.length : 0;
-    this.totalWidth = this.histogramWidth + this.lineWidthOffset + 20;
+    this.totalWidth = this.histogramWidth + this.lineWidthOffset;
   }
 
   render(): void {
@@ -176,8 +179,16 @@ class RowHistogram {
 
   private updateAxis(): void {
     if (!this.leftAxis) return;
-    this.leftAxis.attr('x1', 0).attr('x2', 0).attr('y1', 0).attr('y2', this.height);
-    this.topAxis.attr('x1', 0).attr('x2', this.histogramWidth).attr('y1', 0).attr('y2', 0);
+    this.leftAxis
+      .attr('x1', -this.lineHeightOffset)
+      .attr('x2', -this.lineHeightOffset)
+      .attr('y1', -this.lineHeightOffset)
+      .attr('y2', this.height + this.lineHeightOffset);
+    this.topAxis
+      .attr('x1', -this.lineHeightOffset)
+      .attr('x2', this.histogramWidth + this.lineHeightOffset)
+      .attr('y1', -this.lineHeightOffset)
+      .attr('y2', -this.lineHeightOffset);
     this.zeroText.attr('x', 0).attr('y', -8).text(0);
     this.topText.attr('x', this.histogramWidth).attr('y', -8).attr('text-anchor', 'end').text(this.topCount);
     const half = Math.floor(this.topCount / 2);

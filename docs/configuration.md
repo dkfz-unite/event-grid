@@ -32,7 +32,7 @@ const configuration = {
   leftTextWidth: 80,
   margin: { top: 30, right: 100, bottom: 15, left: 80 },
   rowHistogramWidth: 80,
-  histogramBorderPadding: { left: 10, bottom: 5 },
+  histogramBorderPadding: { left: 20, bottom: 5 },
   trackHeight: 10,
   trackPadding: 20,
   prefix: 'eg-'

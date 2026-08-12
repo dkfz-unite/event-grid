@@ -11,8 +11,8 @@ All sizes are pixels. The matrix dimensions exclude labels, histograms, tracks, 
 | `configuration.leftTextWidth` | `number` | `80` | Width reserved for row labels |
 | `configuration.margin` | object | `{ top: 30, right: 100, bottom: 15, left: 80 }` | Outer space around the visualization |
 | `configuration.rowHistogramWidth` | `number` | `80` | Width of the row histogram |
-| `configuration.histogramBorderPadding.left` | `number` | `10` | Horizontal padding beside histogram borders |
-| `configuration.histogramBorderPadding.bottom` | `number` | `5` | Vertical padding below histogram borders |
+| `configuration.histogramBorderPadding.left` | `number` | `20` | Horizontal space between the matrix and row histogram |
+| `configuration.histogramBorderPadding.bottom` | `number` | `5` | Space between histogram bars and their adjacent axis lines |
 | `configuration.trackHeight` | `number` | `10` | Thickness of every metadata track |
 | `configuration.trackPadding` | `number` | `20` | Space allocated around track groups |
 | `configuration.prefix` | `string` | `'eg-'` | Prefix for generated CSS class names |
