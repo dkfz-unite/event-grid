@@ -29,13 +29,6 @@ const grid = new EventGrid<SampleColumn, SampleRow, SampleEvent>({
   ]
 });
 
-grid.types.forEach((type) => {
-  const item = document.createElement('span');
-  item.style.setProperty('--color', grid.colorMap[type]);
-  item.textContent = type;
-  element('legend').appendChild(item);
-});
-
 const cellCounts: Record<string, number> = {};
 sample.events.forEach((event) => {
   const cellKey = `${event.columnId}::${event.rowId}`;

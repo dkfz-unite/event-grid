@@ -15,6 +15,7 @@ export interface GridEvent {
   columnId: GridId;
   rowId: GridId;
   type: string;
+  label?: string;
   [metadata: string]: unknown;
 }
 
@@ -23,7 +24,7 @@ export type TrackField<TItem extends GridItem = GridItem> = string | TrackValueG
 
 export interface TrackDefinition<TItem extends GridItem = GridItem> {
   id: GridId;
-  label: string;
+  label?: string;
   field: TrackField<TItem>;
   fill?: string;
   opacityFunction?: (data: TrackItemPayload<TItem>) => number;
@@ -62,22 +63,44 @@ export interface CrosshairCellData<TEvent extends GridEvent = GridEvent> {
 export type CrosshairInteractionPayload<TEvent extends GridEvent = GridEvent> =
   ElementInteraction<CrosshairCellData<TEvent>, SVGElement>;
 
-export interface HistogramCellData<TAxis extends Axis = Axis> {
-  axis: TAxis;
-  itemId: GridId;
+export interface ColumnHistogramCellData {
+  columnId: GridId;
   type: string;
+  label: string;
   count: number;
 }
+
+export interface RowHistogramCellData {
+  rowId: GridId;
+  type: string;
+  label: string;
+  count: number;
+}
+
+export type HistogramCellData<TAxis extends Axis = Axis> = TAxis extends 'column'
+  ? ColumnHistogramCellData
+  : RowHistogramCellData;
 
 export type HistogramInteractionPayload<TAxis extends Axis = Axis> =
   ElementInteraction<HistogramCellData<TAxis>, SVGRectElement>;
 
-export interface TrackCellData<TAxis extends Axis = Axis> {
-  axis: TAxis;
-  itemId: GridId;
-  trackId: GridId;
+export interface ColumnTrackCellData {
+  columnId: GridId;
+  id: GridId;
+  label: string;
   value: unknown;
 }
+
+export interface RowTrackCellData {
+  rowId: GridId;
+  id: GridId;
+  label: string;
+  value: unknown;
+}
+
+export type TrackCellData<TAxis extends Axis = Axis> = TAxis extends 'column'
+  ? ColumnTrackCellData
+  : RowTrackCellData;
 
 export type TrackInteractionPayload<TAxis extends Axis = Axis> =
   ElementInteraction<TrackCellData<TAxis>, SVGRectElement>;
@@ -105,6 +128,7 @@ export interface EventGridOptions<
   eventStacking?: EventStacking;
   colorPalette?: string[];
   colorMap?: Record<string, string>;
+  legend?: boolean;
   summaryEventTypes?: string[];
   rowHistogramWidth?: number;
   histogramBorderPadding?: { left?: number; bottom?: number };
@@ -122,16 +146,16 @@ export interface EventGridEventMap<TEvent extends GridEvent = GridEvent> {
   [EVENT_GRID_EVENTS.gridCrosshairMouseOut]: void;
   [EVENT_GRID_EVENTS.columnHistogramClick]: HistogramInteractionPayload<'column'>;
   [EVENT_GRID_EVENTS.columnHistogramMouseOver]: HistogramInteractionPayload<'column'>;
-  [EVENT_GRID_EVENTS.columnHistogramMouseOut]: { axis: 'column' };
+  [EVENT_GRID_EVENTS.columnHistogramMouseOut]: void;
   [EVENT_GRID_EVENTS.rowHistogramClick]: HistogramInteractionPayload<'row'>;
   [EVENT_GRID_EVENTS.rowHistogramMouseOver]: HistogramInteractionPayload<'row'>;
-  [EVENT_GRID_EVENTS.rowHistogramMouseOut]: { axis: 'row' };
+  [EVENT_GRID_EVENTS.rowHistogramMouseOut]: void;
   [EVENT_GRID_EVENTS.columnTrackClick]: TrackInteractionPayload<'column'>;
   [EVENT_GRID_EVENTS.columnTrackMouseOver]: TrackInteractionPayload<'column'>;
-  [EVENT_GRID_EVENTS.columnTrackMouseOut]: { axis: 'column' };
+  [EVENT_GRID_EVENTS.columnTrackMouseOut]: void;
   [EVENT_GRID_EVENTS.rowTrackClick]: TrackInteractionPayload<'row'>;
   [EVENT_GRID_EVENTS.rowTrackMouseOver]: TrackInteractionPayload<'row'>;
-  [EVENT_GRID_EVENTS.rowTrackMouseOut]: { axis: 'row' };
+  [EVENT_GRID_EVENTS.rowTrackMouseOut]: void;
   [EVENT_GRID_EVENTS.renderAllStart]: void;
   [EVENT_GRID_EVENTS.renderAllEnd]: void;
   [EVENT_GRID_EVENTS.renderMainGridStart]: void;

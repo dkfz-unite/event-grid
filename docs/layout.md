@@ -35,6 +35,8 @@ grid.resize(900, 480);
 
 If `height / rowCount` is below `minCellHeight`, EventGrid increases the matrix height to `rowCount * minCellHeight`.
 
+The event legend is placed 20 pixels after the row tracks. Its color swatches use the calculated grid cell height for both width and height. Disable it with `configuration.legend: false`.
+
 ## Margins
 
 Provide all four margin values:

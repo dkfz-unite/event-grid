@@ -25,6 +25,13 @@ const rows: SampleRow[] = [];
 const events: SampleEvent[] = [];
 const owners = ['Avery', 'Blake', 'Casey', 'Drew', 'Emery'];
 const eventTypes = ['complete', 'active', 'blocked', 'review'];
+const eventLabels: Record<string, string> = {
+  complete: 'Complete',
+  active: 'In progress',
+  blocked: 'Blocked',
+  review: 'In review',
+  flagged: 'Flagged'
+};
 let eventNumber = 1;
 
 function padded(number: number): string {
@@ -68,11 +75,13 @@ for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
       (rowIndex + 1) * (columnIndex + 1) * 7) % 100;
 
     if (distribution < 24) {
+      const type = eventTypes[(rowIndex + columnIndex) % eventTypes.length];
       events.push({
         id: `event-${padded(eventNumber++)}`,
         columnId: columns[columnIndex].id,
         rowId: rows[rowIndex].id,
-        type: eventTypes[(rowIndex + columnIndex) % eventTypes.length],
+        type,
+        label: eventLabels[type],
         score: 10 + ((rowIndex * 11 + columnIndex * 7) % 91)
       });
     }
@@ -83,6 +92,7 @@ for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
         columnId: columns[columnIndex].id,
         rowId: rows[rowIndex].id,
         type: 'flagged',
+        label: eventLabels.flagged,
         score: 100,
         note: 'Second event in this cell'
       });

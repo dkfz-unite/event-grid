@@ -1,7 +1,7 @@
 {
   "name": "@dkfz-unite/event-grid",
   "description": "Generic column, row, and typed-event matrix visualization",
-  "version": "4.1.1",
+  "version": "4.2.0",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {

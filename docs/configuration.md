@@ -16,6 +16,7 @@ const configuration = {
   summaryEventTypes: ['active', 'complete', 'blocked'],
   colorPalette: ['#0072b2', '#e69f00', '#009e73'],
   colorMap: { blocked: '#d55e00' },
+  legend: true,
   heatMapColor: '#D33682',
 
   // Behavior
@@ -64,6 +65,7 @@ See [Data](data.md) for schemas, tracks, callback functions, and TypeScript type
 | `configuration.summaryEventTypes` | all event types | Event types included in the two histograms, in stack order |
 | `configuration.colorPalette` | built-in 20-color palette | Colors assigned to event types |
 | `configuration.colorMap` | `{}` | Explicit colors keyed by event type |
+| `configuration.legend` | `true` | Show the event-type color legend after row tracks |
 | `configuration.heatMapColor` | `'#D33682'` | Base color used in heat-map mode |
 
 These properties control data-event rendering. They are unrelated to the interaction events emitted by the component. See [Data: Event colors and summaries](data.md#event-colors-and-summaries).

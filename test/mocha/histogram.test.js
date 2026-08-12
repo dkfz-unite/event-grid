@@ -25,6 +25,7 @@ describe('Histograms', function () {
     var columnBars = document.querySelectorAll('#test5 .eg-column-histogram .eg-histogram-bar');
     var rowBars = document.querySelectorAll('#test5 .eg-row-histogram .eg-summary-bar');
     var rowAxis = document.querySelectorAll('#test5 .eg-row-histogram .eg-histogram-axis');
+    var rowTicks = document.querySelectorAll('#test5 .eg-row-histogram .eg-histogram-tick');
     expect(columnBars.length).to.equal(4);
     expect(document.querySelectorAll('#test5 .eg-histogram').length).to.equal(1);
     expect(rowBars.length).to.equal(4);
@@ -46,6 +47,10 @@ describe('Histograms', function () {
     expect(rowAxis[1].getAttribute('x2')).to.equal('85');
     expect(rowAxis[1].getAttribute('y1')).to.equal('-5');
     expect(rowAxis[1].getAttribute('y2')).to.equal('-5');
+    expect(Array.prototype.map.call(rowTicks, function (tick) { return tick.textContent; }))
+      .to.deep.equal(['2', '1']);
+    expect(rowTicks[0].getAttribute('y')).to.equal('-11');
+    expect(rowTicks[1].getAttribute('y')).to.equal('-11');
     expect(document.querySelector('#test5 .eg-row-histogram').textContent).to.contain('Event frequency');
     grid.destroy();
   });
@@ -55,7 +60,7 @@ describe('Histograms', function () {
       element: '#test5',
       columns: [{ id: 'c1', label: 'Column' }],
       rows: [{ id: 'r1', label: 'Row' }],
-      events: [{ id: 'e1', columnId: 'c1', rowId: 'r1', type: 'ok' }]
+      events: [{ id: 'e1', columnId: 'c1', rowId: 'r1', type: 'ok', label: 'Okay' }]
     });
     var columnHover;
     var columnClick;
@@ -76,13 +81,11 @@ describe('Histograms', function () {
     dispatch(rowBar, 'click');
 
     expect(columnHover.element).to.equal(columnBar);
-    expect(columnHover.data.axis).to.equal('column');
-    expect(columnClick.data.itemId).to.equal('c1');
-    expect(columnClick.data.type).to.equal('ok');
+    expect(columnHover.data).to.deep.equal({ columnId: 'c1', type: 'ok', label: 'Okay', count: 1 });
+    expect(columnClick.data).to.deep.equal({ columnId: 'c1', type: 'ok', label: 'Okay', count: 1 });
     expect(rowHover.element).to.equal(rowBar);
-    expect(rowHover.data.axis).to.equal('row');
-    expect(rowClick.data.itemId).to.equal('r1');
-    expect(rowClick.data.type).to.equal('ok');
+    expect(rowHover.data).to.deep.equal({ rowId: 'r1', type: 'ok', label: 'Okay', count: 1 });
+    expect(rowClick.data).to.deep.equal({ rowId: 'r1', type: 'ok', label: 'Okay', count: 1 });
     grid.destroy();
   });
 });

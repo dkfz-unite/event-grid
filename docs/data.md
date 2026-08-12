@@ -94,6 +94,7 @@ interface GridEvent {
   columnId: string | number;
   rowId: string | number;
   type: string;
+  label?: string;
   [metadata: string]: unknown;
 }
 ```
@@ -104,9 +105,10 @@ interface GridEvent {
 | `columnId` | yes | Identifier of an existing column |
 | `rowId` | yes | Identifier of an existing row |
 | `type` | yes | Application-defined category and color key |
+| `label` | no | Readable event-type name used in interactions and the legend; defaults to `type` |
 | other fields | no | Metadata returned with cell interactions |
 
-References are not inferred from labels or metadata. Validate that every event references an existing column and row.
+References are not inferred from labels or metadata. Validate that every event references an existing column and row. Events sharing a `type` should use the same `label`; the first non-empty label for that type is used by summaries and the legend.
 
 ### Multiple events in a cell
 
@@ -117,7 +119,7 @@ const vertical = { eventStacking: 'v' };   // default
 const horizontal = { eventStacking: 'h' };
 ```
 
-Cell interaction payloads return all events in that cell. In heat-map mode the cell instead uses one color whose darkness increases with the number of events.
+Each rendered segment emits its own event object. Crosshair interactions return every event in the hovered cell. In heat-map mode the cell uses one color whose darkness increases with the number of events.
 
 ### Frequency ordering
 
@@ -144,7 +146,7 @@ type TrackField<TItem extends GridItem = GridItem> = string | TrackValueGetter<T
 
 interface TrackDefinition<TItem extends GridItem = GridItem> {
   id: string | number;
-  label: string;
+  label?: string;
   field: TrackField<TItem>;
   fill?: string;
   opacityFunction?: (data: TrackItemPayload<TItem>) => number;
@@ -161,13 +163,13 @@ interface TrackDefinition<TItem extends GridItem = GridItem> {
 | Field | Required | Meaning |
 | --- | --- | --- |
 | `id` | yes | Stable track identifier used for identity and generated selectors |
-| `label` | yes | Visible track label |
+| `label` | no | Visible track label; defaults to the string form of `id` |
 | `field` | yes | Direct property name or value-getter function |
 | `fill` | no | One color for values not overridden by `colorMap` |
 | `opacityFunction` | no | Custom opacity callback for this track |
 | `colorPalette` | no | Palette assigned to unique values in first-seen order |
 | `colorMap` | no | Color overrides keyed by stringified track value |
-| `type` | no | Set to `'number'` to force numeric opacity; also included in interaction payloads |
+| `type` | no | Set to `'number'` to force numeric opacity |
 | `group` | no | Shared group label; defaults to `Tracks` |
 | `sort` | no | Custom comparator factory overriding the default track-label sorting |
 
@@ -329,6 +331,18 @@ The resolved map is available as `grid.colorMap`; a copy of the built-in palette
 
 `summaryEventTypes` selects the event types included in both histograms and controls their stack order. It does not hide events from grid cells or change `grid.colorMap`. When omitted, all encountered event types are summarized in first-appearance order. Each event contributes to a histogram count, so two events in one cell count twice there.
 
+### Event legend
+
+The legend is shown by default after the row tracks. It lists every event type in first-appearance order using its resolved palette or map color and its readable `label`. When no label is supplied, the type string is displayed.
+
+```js
+const configuration = {
+  legend: false
+};
+```
+
+Legend swatches are squares whose side equals the actual calculated grid cell height. Their size follows `height`, the row count, `minCellHeight`, and `resize()`.
+
 ## TypeScript
 
 The package includes declarations. JavaScript consumers do not need TypeScript.
@@ -364,6 +378,7 @@ const configuration: EventGrid.Options<
     columnId: 'c1',
     rowId: 'r1',
     type: 'active',
+    label: 'In progress',
     note: 'Typed metadata'
   }],
   columnTracks: [{
