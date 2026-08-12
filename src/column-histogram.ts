@@ -8,6 +8,7 @@ import {
   idKey
 } from './internal-types';
 import { EVENT_GRID_EVENTS } from './event-names';
+import { HistogramInteractionPayload } from './types';
 
 function getColumnEventStats(
   eventTypes: string[],
@@ -96,7 +97,7 @@ class ColumnHistogram {
   private bindInteractions(): void {
     this.histogram
       .on('mouseover', (domEvent: MouseEvent) => {
-        const target = domEvent.target as HTMLElement;
+        const target = domEvent.target as SVGRectElement;
         const index = target.dataset && target.dataset.itemIndex;
         if (typeof index === 'undefined' || !this.items[Number(index)]) return;
         const payload = this.payloadFor(target, Number(index));
@@ -106,7 +107,7 @@ class ColumnHistogram {
         this.emit(EVENT_GRID_EVENTS.columnHistogramMouseOut, { axis: 'column' });
       })
       .on('click', (domEvent: MouseEvent) => {
-        const target = domEvent.target as HTMLElement;
+        const target = domEvent.target as SVGRectElement;
         const index = target.dataset && target.dataset.itemIndex;
         if (typeof index === 'undefined' || !this.items[Number(index)]) return;
         const payload = this.payloadFor(target, Number(index));
@@ -114,12 +115,15 @@ class ColumnHistogram {
       });
   }
 
-  private payloadFor(target: HTMLElement, index: number): Record<string, unknown> {
+  private payloadFor(target: SVGRectElement, index: number): HistogramInteractionPayload<'column'> {
     return {
-      axis: 'column',
-      item: this.items[index],
-      type: target.dataset.eventType,
-      count: Number(target.dataset.count)
+      element: target,
+      data: {
+        axis: 'column',
+        itemId: this.items[index].id,
+        type: target.dataset.eventType || '',
+        count: Number(target.dataset.count)
+      }
     };
   }
 

@@ -8,6 +8,7 @@ import {
   idKey
 } from './internal-types';
 import { EVENT_GRID_EVENTS } from './event-names';
+import { HistogramInteractionPayload } from './types';
 
 function getRowEventStats(
   eventTypes: string[],
@@ -95,7 +96,7 @@ class RowHistogram {
   private bindInteractions(): void {
     this.chart
       .on('mouseover', (domEvent: MouseEvent) => {
-        const target = domEvent.target as HTMLElement;
+        const target = domEvent.target as SVGRectElement;
         if (!target.dataset || !target.dataset.rowId) return;
         this.emit(EVENT_GRID_EVENTS.rowHistogramMouseOver, this.payloadFor(target));
       })
@@ -103,21 +104,23 @@ class RowHistogram {
         this.emit(EVENT_GRID_EVENTS.rowHistogramMouseOut, { axis: 'row' });
       })
       .on('click', (domEvent: MouseEvent) => {
-        const target = domEvent.target as HTMLElement;
+        const target = domEvent.target as SVGRectElement;
         if (!target.dataset || !target.dataset.rowId) return;
         this.emit(EVENT_GRID_EVENTS.rowHistogramClick, this.payloadFor(target));
       });
   }
 
-  private payloadFor(target: HTMLElement): Record<string, unknown> {
+  private payloadFor(target: SVGRectElement): HistogramInteractionPayload<'row'> {
     const rowId = target.dataset.rowId as string;
     const row = this.domain.find((item) => idKey(item.id) === rowId);
     return {
-      axis: 'row',
-      item: row,
-      rowId,
-      type: target.dataset.eventType,
-      count: Number(target.dataset.count)
+      element: target,
+      data: {
+        axis: 'row',
+        itemId: row ? row.id : rowId,
+        type: target.dataset.eventType || '',
+        count: Number(target.dataset.count)
+      }
     };
   }
 

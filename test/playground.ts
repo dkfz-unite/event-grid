@@ -8,15 +8,6 @@ function element<TElement extends HTMLElement>(id: string): TElement {
   return found as TElement;
 }
 
-function sortNumber<TItem extends EventGrid.Item>(getValue: EventGrid.TrackValueGetter<TItem>) {
-  return (a: TItem, b: TItem) => Number(getValue(b)) - Number(getValue(a));
-}
-
-function sortText<TItem extends EventGrid.Item>(getValue: EventGrid.TrackValueGetter<TItem>) {
-  return (a: TItem, b: TItem) =>
-    String(getValue(a)).localeCompare(String(getValue(b)));
-}
-
 const grid = new EventGrid<SampleColumn, SampleRow, SampleEvent>({
   element: '#grid',
   columns: sample.columns,
@@ -29,12 +20,12 @@ const grid = new EventGrid<SampleColumn, SampleRow, SampleEvent>({
   eventStacking: 'v',
   trackHeight: 12,
   columnTracks: [
-    { id: 'capacity', label: 'Capacity', field: 'capacity', fill: '#2e7d32', type: 'number', group: 'Column metadata', sort: sortNumber },
-    { id: 'group', label: 'Group', field: (column) => column.metadata.group, colorPalette: ['#1565c0', '#ef6c00', '#6a1b9a'], type: 'text', group: 'Column metadata', sort: sortText }
+    { id: 'capacity', label: 'Capacity', field: 'capacity', fill: '#2e7d32', type: 'number', group: 'Column metadata' },
+    { id: 'group', label: 'Group', field: (column) => column.metadata.group, colorPalette: ['#1565c0', '#ef6c00', '#6a1b9a'], type: 'text', group: 'Column metadata' }
   ],
   rowTracks: [
-    { id: 'priority', label: 'Priority', field: 'priority', fill: '#607d8b', type: 'number', group: 'Row metadata', sort: sortNumber },
-    { id: 'category', label: 'Category', field: (row) => row.metadata.category, colorMap: { Quality: '#c62828' }, type: 'text', group: 'Row metadata', sort: sortText }
+    { id: 'priority', label: 'Priority', field: 'priority', fill: '#607d8b', type: 'number', group: 'Row metadata' },
+    { id: 'category', label: 'Category', field: (row) => row.metadata.category, colorMap: { Quality: '#c62828' }, type: 'text', group: 'Row metadata' }
   ]
 });
 
@@ -60,18 +51,25 @@ element('stats').textContent =
   ` occupied cells · ${totalCells - occupiedCells} empty cells · ` +
   `${multiEventCells} multi-event cells`;
 
-function showPayload(event: CustomEvent<EventGrid.Cell<SampleColumn, SampleRow, SampleEvent>>) {
-  const payload = event.detail;
+function showPayload(event: CustomEvent<EventGrid.GridInteraction<SampleEvent>>) {
+  const { element: source, data } = event.detail;
   element('details').textContent = JSON.stringify({
-    column: { id: payload.column.id, label: payload.column.label },
-    row: { id: payload.row.id, label: payload.row.label },
-    events: payload.events.map(({ id, type, score, note }) => ({ id, type, score, note }))
+    element: source.tagName.toLowerCase(),
+    event: data
+  }, null, 2);
+}
+
+function showCrosshairPayload(event: CustomEvent<EventGrid.CrosshairInteraction<SampleEvent>>) {
+  const { element: source, data } = event.detail;
+  element('details').textContent = JSON.stringify({
+    element: source.tagName.toLowerCase(),
+    cell: data
   }, null, 2);
 }
 
 grid.addEventListener(EventGrid.eventNames.gridMouseOver, showPayload);
 grid.addEventListener(EventGrid.eventNames.gridClick, showPayload);
-grid.addEventListener(EventGrid.eventNames.gridCrosshairMouseOver, showPayload);
+grid.addEventListener(EventGrid.eventNames.gridCrosshairMouseOver, showCrosshairPayload);
 element<HTMLButtonElement>('toggle-grid').onclick = () => grid.toggleGridLines();
 element<HTMLButtonElement>('toggle-crosshair').onclick = () => grid.toggleCrosshair();
 element<HTMLButtonElement>('toggle-heatmap').onclick = () => grid.toggleHeatmap();

@@ -169,7 +169,7 @@ interface TrackDefinition<TItem extends GridItem = GridItem> {
 | `colorMap` | no | Color overrides keyed by stringified track value |
 | `type` | no | Set to `'number'` to force numeric opacity; also included in interaction payloads |
 | `group` | no | Shared group label; defaults to `Tracks` |
-| `sort` | no | Factory returning the comparator used when the track label is clicked |
+| `sort` | no | Custom comparator factory overriding the default track-label sorting |
 
 Track IDs must be unique within a group. Tracks with the same `group` share a group label. To change visible tracks, construct and render a grid with the required `columnTracks` and `rowTracks` collections.
 
@@ -199,7 +199,17 @@ The getter receives the complete column or row object. EventGrid stores its retu
 
 ### Track sorting
 
-The `sort` function receives a normalized getter and returns a standard array comparator. EventGrid creates that getter from either supported `field` form:
+Clicking any track label sorts its corresponding axis. The default depends on the track values:
+
+| Track values | Default order |
+| --- | --- |
+| Numbers or numeric strings | Numeric, lowest to highest |
+| Other values | Equal values grouped; largest group first, then smaller groups |
+| Missing or invalid numeric values | Last |
+
+Categorical groups with the same size are ordered alphabetically. Items within the same group keep their existing order.
+
+To override this behavior, provide `sort`. It receives a normalized getter and returns a standard array comparator. EventGrid creates the getter from either supported `field` form:
 
 ```js
 const numericTrack = {
@@ -211,7 +221,7 @@ const numericTrack = {
 };
 ```
 
-Clicking that track's label sorts its corresponding axis. Row sorting also recalculates the column order from the new row sequence.
+Row-track sorting also recalculates the column order from the new row sequence.
 
 ### Track colors and opacity
 
@@ -269,7 +279,7 @@ Supplying `colorPalette` opts even a numeric track into per-value colors; its au
 
 #### Callback payload
 
-The opacity callback and track interaction events receive:
+The opacity callback receives:
 
 ```ts
 interface TrackItemPayload {
@@ -369,4 +379,6 @@ const configuration: EventGrid.Options<
 const grid = new EventGrid<ProjectColumn, ProjectRow, ProjectEvent>(configuration);
 ```
 
-Public types include `EventGrid.Id`, `Item`, `Event`, `Stacking`, `GridAxis`, `Options`, `Events`, `Cell`, `ColumnHistogram`, `RowHistogram`, `Track`, `TrackField`, `TrackValueGetter`, `TrackItem`, and `TrackEvent`.
+Public types include `EventGrid.Id`, `Item`, `Event`, `Stacking`, `GridAxis`, `Options`, `Events`, `Interaction`, `GridInteraction`, `CrosshairCell`, `CrosshairInteraction`, `HistogramCell`, `HistogramInteraction`, `Track`, `TrackField`, `TrackValueGetter`, `TrackItem`, `TrackCell`, and `TrackInteraction`.
+
+Interaction payloads are documented in [Emitted events](emitted-events.md).

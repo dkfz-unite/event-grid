@@ -145,12 +145,16 @@ describe('Tracks', function () {
     dispatch(rowCell, 'mouseover');
     dispatch(rowCell, 'click');
 
-    expect(columnHover.axis).to.equal('column');
-    expect(columnClick.item.trackId).to.equal('owner');
-    expect(columnClick.item.trackLabel).to.equal('Owner');
-    expect(columnClick.item.field).to.equal('owner');
-    expect(rowHover.axis).to.equal('row');
-    expect(rowClick.item.trackId).to.equal('priority');
+    expect(columnHover.element).to.equal(columnCell);
+    expect(columnHover.data.axis).to.equal('column');
+    expect(columnClick.data.itemId).to.equal('c1');
+    expect(columnClick.data.trackId).to.equal('owner');
+    expect(columnClick.data.value).to.equal('Avery');
+    expect(rowHover.element).to.equal(rowCell);
+    expect(rowHover.data.axis).to.equal('row');
+    expect(rowClick.data.itemId).to.equal('r1');
+    expect(rowClick.data.trackId).to.equal('priority');
+    expect(rowClick.data.value).to.equal(2);
     grid.destroy();
   });
 
@@ -169,7 +173,7 @@ describe('Tracks', function () {
         field: function (column) { return column.metadata.owner; },
         sort: function (getValue) {
           return function (first, second) {
-            return String(getValue(first)).localeCompare(String(getValue(second)));
+            return String(getValue(second)).localeCompare(String(getValue(first)));
           };
         }
       }]
@@ -178,7 +182,94 @@ describe('Tracks', function () {
 
     dispatch(document.querySelector('#test6 .eg-track-label'), 'click');
 
-    expect(grid.columns.map(function (column) { return column.id; })).to.deep.equal(['c2', 'c1']);
+    expect(grid.columns.map(function (column) { return column.id; })).to.deep.equal(['c1', 'c2']);
+    grid.destroy();
+  });
+
+  it('sorts numeric tracks from lowest to highest by default', function () {
+    var grid = new EventGrid({
+      element: '#test6',
+      columns: [
+        { id: 'c30', metric: 30 },
+        { id: 'c2', metric: '2' },
+        { id: 'missing', metric: null },
+        { id: 'c10', metric: 10 }
+      ],
+      rows: [],
+      events: [],
+      columnTracks: [{ id: 'metric', label: 'Metric', field: 'metric' }]
+    });
+    grid.render();
+
+    dispatch(document.querySelector('#test6 .eg-track-label'), 'click');
+
+    expect(grid.columns.map(function (column) { return column.id; }))
+      .to.deep.equal(['c2', 'c10', 'c30', 'missing']);
+    grid.destroy();
+  });
+
+  it('groups categorical tracks by descending value frequency by default', function () {
+    var grid = new EventGrid({
+      element: '#test6',
+      columns: [
+        { id: 'c1', category: 'v4' },
+        { id: 'c2', category: 'v2' },
+        { id: 'c3', category: 'v1' },
+        { id: 'c4', category: 'v3' },
+        { id: 'c5', category: 'v1' },
+        { id: 'c6', category: 'v2' },
+        { id: 'c7', category: 'v1' },
+        { id: 'c8', category: 'v3' },
+        { id: 'c9', category: 'v1' },
+        { id: 'missing', category: null }
+      ],
+      rows: [],
+      events: [],
+      columnTracks: [{ id: 'category', label: 'Category', field: 'category' }]
+    });
+    grid.render();
+
+    dispatch(document.querySelector('#test6 .eg-track-label'), 'click');
+
+    expect(grid.columns.map(function (column) { return column.id; })).to.deep.equal([
+      'c3', 'c5', 'c7', 'c9', 'c2', 'c6', 'c4', 'c8', 'c1', 'missing'
+    ]);
+    grid.destroy();
+  });
+
+  it('renders the largest categorical row-track group first from top to bottom', function () {
+    var grid = new EventGrid({
+      element: '#test6',
+      columns: [{ id: 'c1' }],
+      rows: [
+        { id: 'r1', category: 'small' },
+        { id: 'r2', category: 'large' },
+        { id: 'r3', category: 'medium' },
+        { id: 'r4', category: 'large' },
+        { id: 'r5', category: 'medium' },
+        { id: 'r6', category: 'large' }
+      ],
+      events: [],
+      rowTracks: [{ id: 'category', label: 'Category', field: 'category' }]
+    });
+    grid.render();
+
+    dispatch(document.querySelector('#test6 .eg-track-label'), 'click');
+
+    expect(grid.rows.map(function (row) { return row.category; }))
+      .to.deep.equal(['large', 'large', 'large', 'medium', 'medium', 'small']);
+
+    var rendered = Array.prototype.map.call(
+      document.querySelectorAll('#test6 .eg-track-category'),
+      function (cell) {
+        return {
+          value: cell.getAttribute('class').match(/eg-track-value-([^ ]+)/)[1],
+          top: cell.getBoundingClientRect().top
+        };
+      }
+    ).sort(function (first, second) { return first.top - second.top; });
+    expect(rendered.map(function (cell) { return cell.value; }))
+      .to.deep.equal(['large', 'large', 'large', 'medium', 'medium', 'small']);
     grid.destroy();
   });
 });

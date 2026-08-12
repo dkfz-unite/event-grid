@@ -92,9 +92,9 @@ class EventGrid<
     this.initGrid();
   }
 
-  private emit<TKey extends keyof EventGridEventMap<TColumn, TRow, TEvent>>(
+  private emit<TKey extends keyof EventGridEventMap<TEvent>>(
     type: TKey,
-    detail?: EventGridEventMap<TColumn, TRow, TEvent>[TKey]
+    detail?: EventGridEventMap<TEvent>[TKey]
   ): boolean {
     return this.dispatchEvent(new CustomEvent(String(type), { detail }));
   }
@@ -354,9 +354,9 @@ interface EventGrid<
   TRow extends GridItem = GridItem,
   TEvent extends GridEvent = GridEvent
 > {
-  addEventListener<TKey extends keyof EventGridEventMap<TColumn, TRow, TEvent>>(
+  addEventListener<TKey extends keyof EventGridEventMap<TEvent>>(
     type: TKey,
-    listener: (event: CustomEvent<EventGridEventMap<TColumn, TRow, TEvent>[TKey]>) => void,
+    listener: (event: CustomEvent<EventGridEventMap<TEvent>[TKey]>) => void,
     options?: boolean | AddEventListenerOptions
   ): void;
   addEventListener(
@@ -364,9 +364,9 @@ interface EventGrid<
     listener: EventListenerOrEventListenerObject | null,
     options?: boolean | AddEventListenerOptions
   ): void;
-  removeEventListener<TKey extends keyof EventGridEventMap<TColumn, TRow, TEvent>>(
+  removeEventListener<TKey extends keyof EventGridEventMap<TEvent>>(
     type: TKey,
-    listener: (event: CustomEvent<EventGridEventMap<TColumn, TRow, TEvent>[TKey]>) => void,
+    listener: (event: CustomEvent<EventGridEventMap<TEvent>[TKey]>) => void,
     options?: boolean | EventListenerOptions
   ): void;
   removeEventListener(

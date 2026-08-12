@@ -45,40 +45,42 @@ export interface TrackItemPayload<TItem extends GridItem = GridItem> {
   type?: string;
 }
 
-export interface CellPayload<
-  TColumn extends GridItem = GridItem,
-  TRow extends GridItem = GridItem,
-  TEvent extends GridEvent = GridEvent
-> {
+export interface ElementInteraction<TData, TElement extends Element = Element> {
+  element: TElement;
+  data: TData;
+}
+
+export type GridInteractionPayload<TEvent extends GridEvent = GridEvent> =
+  ElementInteraction<TEvent, SVGPathElement>;
+
+export interface CrosshairCellData<TEvent extends GridEvent = GridEvent> {
   columnId: GridId;
   rowId: GridId;
-  column: TColumn;
-  row: TRow;
   events: TEvent[];
 }
 
-export interface ColumnHistogramPayload<TColumn extends GridItem = GridItem> {
-  axis: 'column';
-  item: TColumn;
-  type: string;
-  count: number;
-}
+export type CrosshairInteractionPayload<TEvent extends GridEvent = GridEvent> =
+  ElementInteraction<CrosshairCellData<TEvent>, SVGElement>;
 
-export interface TrackPayload<
-  TAxis extends Axis = Axis,
-  TItem extends GridItem = GridItem
-> {
+export interface HistogramCellData<TAxis extends Axis = Axis> {
   axis: TAxis;
-  item: TrackItemPayload<TItem>;
-}
-
-export interface RowHistogramPayload<TRow extends GridItem = GridItem> {
-  axis: 'row';
-  item: TRow;
-  rowId: GridId;
+  itemId: GridId;
   type: string;
   count: number;
 }
+
+export type HistogramInteractionPayload<TAxis extends Axis = Axis> =
+  ElementInteraction<HistogramCellData<TAxis>, SVGRectElement>;
+
+export interface TrackCellData<TAxis extends Axis = Axis> {
+  axis: TAxis;
+  itemId: GridId;
+  trackId: GridId;
+  value: unknown;
+}
+
+export type TrackInteractionPayload<TAxis extends Axis = Axis> =
+  ElementInteraction<TrackCellData<TAxis>, SVGRectElement>;
 
 export interface EventGridOptions<
   TColumn extends GridItem = GridItem,
@@ -112,27 +114,23 @@ export interface EventGridOptions<
   trackPadding?: number;
 }
 
-export interface EventGridEventMap<
-  TColumn extends GridItem = GridItem,
-  TRow extends GridItem = GridItem,
-  TEvent extends GridEvent = GridEvent
-> {
-  [EVENT_GRID_EVENTS.gridClick]: CellPayload<TColumn, TRow, TEvent>;
-  [EVENT_GRID_EVENTS.gridMouseOver]: CellPayload<TColumn, TRow, TEvent>;
+export interface EventGridEventMap<TEvent extends GridEvent = GridEvent> {
+  [EVENT_GRID_EVENTS.gridClick]: GridInteractionPayload<TEvent>;
+  [EVENT_GRID_EVENTS.gridMouseOver]: GridInteractionPayload<TEvent>;
   [EVENT_GRID_EVENTS.gridMouseOut]: void;
-  [EVENT_GRID_EVENTS.gridCrosshairMouseOver]: CellPayload<TColumn, TRow, TEvent>;
+  [EVENT_GRID_EVENTS.gridCrosshairMouseOver]: CrosshairInteractionPayload<TEvent>;
   [EVENT_GRID_EVENTS.gridCrosshairMouseOut]: void;
-  [EVENT_GRID_EVENTS.columnHistogramClick]: ColumnHistogramPayload<TColumn>;
-  [EVENT_GRID_EVENTS.columnHistogramMouseOver]: ColumnHistogramPayload<TColumn>;
+  [EVENT_GRID_EVENTS.columnHistogramClick]: HistogramInteractionPayload<'column'>;
+  [EVENT_GRID_EVENTS.columnHistogramMouseOver]: HistogramInteractionPayload<'column'>;
   [EVENT_GRID_EVENTS.columnHistogramMouseOut]: { axis: 'column' };
-  [EVENT_GRID_EVENTS.rowHistogramClick]: RowHistogramPayload<TRow>;
-  [EVENT_GRID_EVENTS.rowHistogramMouseOver]: RowHistogramPayload<TRow>;
+  [EVENT_GRID_EVENTS.rowHistogramClick]: HistogramInteractionPayload<'row'>;
+  [EVENT_GRID_EVENTS.rowHistogramMouseOver]: HistogramInteractionPayload<'row'>;
   [EVENT_GRID_EVENTS.rowHistogramMouseOut]: { axis: 'row' };
-  [EVENT_GRID_EVENTS.columnTrackClick]: TrackPayload<'column', TColumn>;
-  [EVENT_GRID_EVENTS.columnTrackMouseOver]: TrackPayload<'column', TColumn>;
+  [EVENT_GRID_EVENTS.columnTrackClick]: TrackInteractionPayload<'column'>;
+  [EVENT_GRID_EVENTS.columnTrackMouseOver]: TrackInteractionPayload<'column'>;
   [EVENT_GRID_EVENTS.columnTrackMouseOut]: { axis: 'column' };
-  [EVENT_GRID_EVENTS.rowTrackClick]: TrackPayload<'row', TRow>;
-  [EVENT_GRID_EVENTS.rowTrackMouseOver]: TrackPayload<'row', TRow>;
+  [EVENT_GRID_EVENTS.rowTrackClick]: TrackInteractionPayload<'row'>;
+  [EVENT_GRID_EVENTS.rowTrackMouseOver]: TrackInteractionPayload<'row'>;
   [EVENT_GRID_EVENTS.rowTrackMouseOut]: { axis: 'row' };
   [EVENT_GRID_EVENTS.renderAllStart]: void;
   [EVENT_GRID_EVENTS.renderAllEnd]: void;

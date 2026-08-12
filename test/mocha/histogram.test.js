@@ -67,12 +67,14 @@ describe('Histograms', function () {
     dispatch(rowBar, 'mouseover');
     dispatch(rowBar, 'click');
 
-    expect(columnHover.axis).to.equal('column');
-    expect(columnClick.item.id).to.equal('c1');
-    expect(columnClick.type).to.equal('ok');
-    expect(rowHover.axis).to.equal('row');
-    expect(rowClick.item.id).to.equal('r1');
-    expect(rowClick.type).to.equal('ok');
+    expect(columnHover.element).to.equal(columnBar);
+    expect(columnHover.data.axis).to.equal('column');
+    expect(columnClick.data.itemId).to.equal('c1');
+    expect(columnClick.data.type).to.equal('ok');
+    expect(rowHover.element).to.equal(rowBar);
+    expect(rowHover.data.axis).to.equal('row');
+    expect(rowClick.data.itemId).to.equal('r1');
+    expect(rowClick.data.type).to.equal('ok');
     grid.destroy();
   });
 });
