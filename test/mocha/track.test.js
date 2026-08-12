@@ -158,6 +158,33 @@ describe('Tracks', function () {
     grid.destroy();
   });
 
+  it('uses the configured track padding between the row histogram and row tracks', function () {
+    var grid = new EventGrid({
+      element: '#test6',
+      columns: [{ id: 'c1' }],
+      rows: [{ id: 'r1', priority: 2 }],
+      events: [{ id: 'e1', columnId: 'c1', rowId: 'r1', type: 'active' }],
+      scaleToFit: false,
+      rowHistogramWidth: 80,
+      histogramBorderPadding: { left: 10, bottom: 5 },
+      trackHeight: 12,
+      trackPadding: 20,
+      rowTracks: [{ id: 'priority', label: 'Priority', field: 'priority' }]
+    });
+    grid.render();
+
+    expect(grid.mainGrid.rowHistogram.totalWidth).to.equal(90);
+
+    var histogramBar = document.querySelector('#test6 .eg-row-histogram .eg-summary-bar');
+    var trackCell = document.querySelector('#test6 .eg-track-data');
+    if (histogramBar) {
+      var histogramBounds = histogramBar.getBoundingClientRect();
+      var trackBounds = trackCell.getBoundingClientRect();
+      expect(trackBounds.left - histogramBounds.right).to.be.closeTo(20, 0.01);
+    }
+    grid.destroy();
+  });
+
   it('sorts an axis through a track-label listener', function () {
     var grid = new EventGrid({
       element: '#test6',

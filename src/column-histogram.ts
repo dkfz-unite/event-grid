@@ -48,7 +48,6 @@ class ColumnHistogram {
   readonly histogramHeight = 80;
   readonly padding = 20;
   readonly centerText = -6;
-  readonly lineWidthOffset: number;
   readonly lineHeightOffset: number;
   readonly totalHeight: number;
 
@@ -69,8 +68,7 @@ class ColumnHistogram {
 
   constructor(params: InternalOptions, svg: D3Selection) {
     const borderPadding = params.histogramBorderPadding || {};
-    this.lineWidthOffset = borderPadding.left || 10;
-    this.lineHeightOffset = borderPadding.bottom || 5;
+    this.lineHeightOffset = borderPadding.bottom ?? 5;
     this.prefix = params.prefix || 'eg-';
     this.emit = params.emit;
     this.svg = svg;
@@ -88,7 +86,7 @@ class ColumnHistogram {
     this.container = this.svg.append('g')
       .attr('class', `${this.prefix}histogram ${this.prefix}column-histogram`);
     this.histogram = this.container.append('g')
-      .attr('transform', `translate(0,-${this.totalHeight + this.centerText})`);
+      .attr('transform', `translate(0,-${this.histogramHeight + this.padding})`);
     this.renderAxis();
     this.renderBars();
     this.bindInteractions();
@@ -166,7 +164,7 @@ class ColumnHistogram {
     this.histogramWidth = width;
     this.barWidth = this.items.length ? this.histogramWidth / this.items.length : 0;
     if (!this.container) return;
-    this.histogram.attr('transform', `translate(0,-${this.totalHeight + this.centerText})`);
+    this.histogram.attr('transform', `translate(0,-${this.histogramHeight + this.padding})`);
     this.updateAxis();
     this.renderBars();
   }
@@ -200,7 +198,7 @@ class ColumnHistogram {
     this.bottomAxis
       .attr('y1', this.histogramHeight + this.lineHeightOffset)
       .attr('y2', this.histogramHeight + this.lineHeightOffset)
-      .attr('x2', this.histogramWidth + this.lineWidthOffset)
+      .attr('x2', this.histogramWidth + (this.lineHeightOffset * 2))
       .attr('transform', `translate(-${this.lineHeightOffset},0)`);
     this.leftAxis
       .attr('y1', 0)

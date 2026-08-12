@@ -36,8 +36,16 @@ describe('Histograms', function () {
     expect(columnBars[1].getAttribute('y')).to.equal('0');
     expect(rowBars[0].getAttribute('fill')).to.equal('#00aa00');
     expect(rowBars[1].getAttribute('fill')).to.equal('#aa0000');
-    expect(rowAxis[1].getAttribute('y1')).to.equal('0');
-    expect(rowAxis[1].getAttribute('y2')).to.equal('0');
+    expect(document.querySelector('#test5 .eg-column-histogram > g').getAttribute('transform'))
+      .to.equal('translate(0,-100)');
+    expect(document.querySelector('#test5 .eg-row-histogram > g').getAttribute('transform'))
+      .to.equal('translate(520,0)');
+    expect(rowAxis[0].getAttribute('x1')).to.equal('-5');
+    expect(rowAxis[0].getAttribute('x2')).to.equal('-5');
+    expect(rowAxis[1].getAttribute('x1')).to.equal('-5');
+    expect(rowAxis[1].getAttribute('x2')).to.equal('85');
+    expect(rowAxis[1].getAttribute('y1')).to.equal('-5');
+    expect(rowAxis[1].getAttribute('y2')).to.equal('-5');
     expect(document.querySelector('#test5 .eg-row-histogram').textContent).to.contain('Event frequency');
     grid.destroy();
   });
