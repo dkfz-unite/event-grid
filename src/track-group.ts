@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import defaultColorPalette from './default-color-palette';
 import { EVENT_GRID_EVENTS } from './event-names';
+import { TrackInteractionPayload } from './types';
 import {
   D3Scale,
   D3Selection,
@@ -35,6 +36,25 @@ function numericValue(value: unknown): number | undefined {
   if (typeof value !== 'string' || value.trim() === '') return undefined;
   const converted = Number(value);
   return Number.isFinite(converted) ? converted : undefined;
+}
+
+function missingValue(value: unknown): boolean {
+  return value === null || typeof value === 'undefined' || value === '';
+}
+
+function numericTrack(track: InternalTrack, values: unknown[]): boolean {
+  const available = values.filter((value) => !missingValue(value));
+  return track.type === 'number' ||
+    (available.length > 0 && available.every((value) => typeof numericValue(value) === 'number'));
+}
+
+function compareMissing(first: unknown, second: unknown): number | undefined {
+  const firstMissing = missingValue(first);
+  const secondMissing = missingValue(second);
+  if (firstMissing && secondMissing) return 0;
+  if (firstMissing) return 1;
+  if (secondMissing) return -1;
+  return undefined;
 }
 
 function clampOpacity(value: number): number {
@@ -126,8 +146,7 @@ class TrackGroup {
       const available = items.filter((item) => item.available &&
         typeof item.value !== 'undefined' && item.value !== '');
       const numericValues = available.map((item) => numericValue(item.value));
-      const numeric = track.type === 'number' ||
-        (numericValues.length > 0 && numericValues.every((value) => typeof value === 'number'));
+      const numeric = numericTrack(track, items.map((item) => item.value));
       const hasCustomPalette = Boolean(track.colorPalette && track.colorPalette.length);
       const palette = hasCustomPalette
         ? (track.colorPalette as string[]).slice()
@@ -260,9 +279,12 @@ class TrackGroup {
     labels
       .attr('class', `${this.prefix}track-label ${this.prefix}label-text-font`)
       .on('click', (_domEvent: MouseEvent, track: InternalTrack) => {
-        if (!track.sort) return;
-        this.domain.sort(track.sort(valueGetter(track)));
-        this.updateCallback(false);
+        const getValue = valueGetter(track);
+        const comparator = track.sort
+          ? track.sort(getValue)
+          : this.defaultComparator(track, getValue);
+        this.domain.sort(comparator);
+        this.updateCallback(this.rotated);
       })
       .transition()
       .attr('x', -6)
@@ -270,6 +292,40 @@ class TrackGroup {
       .attr('dy', '.32em')
       .attr('text-anchor', 'end')
       .text((track: InternalTrack) => track.label);
+  }
+
+  private defaultComparator(
+    track: InternalTrack,
+    getValue: (item: PositionedColumn | PositionedRow) => unknown
+  ): (first: PositionedColumn | PositionedRow, second: PositionedColumn | PositionedRow) => number {
+    const values = this.domain.map(getValue);
+    if (numericTrack(track, values)) {
+      return (first, second) => {
+        const firstValue = numericValue(getValue(first));
+        const secondValue = numericValue(getValue(second));
+        if (typeof firstValue === 'undefined' && typeof secondValue === 'undefined') return 0;
+        if (typeof firstValue === 'undefined') return 1;
+        if (typeof secondValue === 'undefined') return -1;
+        return firstValue - secondValue;
+      };
+    }
+
+    const counts: Record<string, number> = Object.create(null) as Record<string, number>;
+    values.forEach((value) => {
+      if (missingValue(value)) return;
+      const key = String(value);
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    return (first, second) => {
+      const firstValue = getValue(first);
+      const secondValue = getValue(second);
+      const missing = compareMissing(firstValue, secondValue);
+      if (typeof missing === 'number') return missing;
+      const firstKey = String(firstValue);
+      const secondKey = String(secondValue);
+      const frequencyDifference = counts[secondKey] - counts[firstKey];
+      return frequencyDifference || firstKey.localeCompare(secondKey);
+    };
   }
 
   setGridLines(active: boolean): void {
@@ -315,12 +371,20 @@ class TrackGroup {
   }
 
   private emitTrackInteraction(domEvent: MouseEvent, suffix: 'Click' | 'MouseOver'): void {
-    const target = domEvent.target as HTMLElement;
+    const target = domEvent.target as SVGRectElement;
     const index = target.dataset && target.dataset.trackDataIndex;
     const item = typeof index === 'undefined' ? undefined : this.trackData[Number(index)];
     if (!item) return;
     const axis = this.rotated ? 'row' : 'column';
-    const payload = { item, axis };
+    const payload: TrackInteractionPayload<typeof axis> = {
+      element: target,
+      data: {
+        axis,
+        itemId: item.id,
+        trackId: item.trackId,
+        value: item.value
+      }
+    };
     const axisEvent = axis === 'column'
       ? suffix === 'Click' ? EVENT_GRID_EVENTS.columnTrackClick : EVENT_GRID_EVENTS.columnTrackMouseOver
       : suffix === 'Click' ? EVENT_GRID_EVENTS.rowTrackClick : EVENT_GRID_EVENTS.rowTrackMouseOver;

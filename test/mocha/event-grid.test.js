@@ -74,15 +74,17 @@ describe('EventGrid generic interface', function () {
     grid.addEventListener(events.gridClick, function (event) { cellDetail = event.detail; });
 
     grid.render();
-    document.querySelector('#test1 .eg-event').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    var eventElement = document.querySelector('#test1 .eg-event');
+    eventElement.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     grid.render();
 
     expect(startCount).to.equal(1);
     expect(removedCount).to.equal(0);
     expect(startEvent).to.be.an.instanceof(CustomEvent);
-    expect(cellDetail.column.id).to.equal('c1');
-    expect(cellDetail.row.id).to.equal('r1');
-    expect(cellDetail.events[0].id).to.equal('e1');
+    expect(cellDetail.element).to.equal(eventElement);
+    expect(cellDetail.data.id).to.equal('e1');
+    expect(cellDetail.data.columnId).to.equal('c1');
+    expect(cellDetail.data.rowId).to.equal('r1');
     grid.destroy();
   });
 
@@ -259,8 +261,10 @@ describe('EventGrid generic interface', function () {
     var bounds = eventCell.getBoundingClientRect();
     mouse(eventCell, 'mousemove', bounds.left + bounds.width / 2, bounds.top + bounds.height / 2, 0);
 
-    expect(detail.column.id).to.equal('c1');
-    expect(detail.row.id).to.equal('r1');
+    expect(detail.element).to.equal(eventCell);
+    expect(detail.data.columnId).to.equal('c1');
+    expect(detail.data.rowId).to.equal('r1');
+    expect(detail.data.events[0].id).to.equal('e1');
     expect(document.querySelector('#test10 .eg-vertical-cross').getAttribute('opacity')).to.equal('1');
     expect(document.querySelector('#test10 .eg-horizontal-cross').getAttribute('opacity')).to.equal('1');
     grid.destroy();

@@ -32,4 +32,6 @@ npm run pack:check
 
 ## Release automation
 
-The package version is defined in [`package.json`](../package.json). Publishing a GitHub Release, or manually dispatching the workflow, runs [`.github/workflows/publish.yml`](../.github/workflows/publish.yml). The workflow installs dependencies, builds, checks the public TypeScript declarations, and publishes to GitHub Packages using the repository's `GITHUB_TOKEN`.
+The package version is defined in [`package.json`](../package.json). Every push to `develop` runs [`.github/workflows/publish.yml`](../.github/workflows/publish.yml). The workflow installs the locked dependencies, builds the package, checks the public TypeScript declarations, and publishes to GitHub Packages using the repository's `GITHUB_TOKEN`.
+
+An npm version can be published only once. Set a new version in `package.json` before each push that should publish a package, and commit the matching `package-lock.json` change.

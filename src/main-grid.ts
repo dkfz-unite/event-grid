@@ -3,7 +3,12 @@ import ColumnHistogram from './column-histogram';
 import RowHistogram from './row-histogram';
 import Track from './track';
 import { EVENT_GRID_EVENTS } from './event-names';
-import { CellPayload, EventStacking, GridId } from './types';
+import {
+  CrosshairInteractionPayload,
+  EventStacking,
+  GridId,
+  GridInteractionPayload
+} from './types';
 import {
   D3Scale,
   D3Selection,
@@ -176,29 +181,28 @@ class MainGrid {
     this.svg
       .on('mouseover', (domEvent: MouseEvent) => {
         if (this.crosshair) return;
-        const event = this.eventFromTarget(domEvent.target as HTMLElement);
-        if (event) this.emit(EVENT_GRID_EVENTS.gridMouseOver, this.cellPayload(event.columnId, event.rowId));
+        const element = domEvent.target as SVGPathElement;
+        const event = this.eventFromTarget(element);
+        if (event) this.emit(EVENT_GRID_EVENTS.gridMouseOver, this.eventPayload(element, event));
       })
       .on('mouseout', () => this.emit(EVENT_GRID_EVENTS.gridMouseOut))
       .on('click', (domEvent: MouseEvent) => {
-        const event = this.eventFromTarget(domEvent.target as HTMLElement);
-        if (event) this.emit(EVENT_GRID_EVENTS.gridClick, this.cellPayload(event.columnId, event.rowId));
+        const element = domEvent.target as SVGPathElement;
+        const event = this.eventFromTarget(element);
+        if (event) this.emit(EVENT_GRID_EVENTS.gridClick, this.eventPayload(element, event));
       });
   }
 
-  private eventFromTarget(target: HTMLElement): PositionedEvent | undefined {
+  private eventFromTarget(target: SVGElement): PositionedEvent | undefined {
     const index = target.dataset && target.dataset.eventIndex;
     return typeof index === 'undefined' ? undefined : this.events[Number(index)];
   }
 
-  cellPayload(columnId: GridId, rowId: GridId): CellPayload<PositionedColumn, PositionedRow, PositionedEvent> {
-    return {
-      columnId,
-      rowId,
-      column: this.columnMap[idKey(columnId)],
-      row: this.rowMap[idKey(rowId)],
-      events: this.eventsAt(columnId, rowId)
-    };
+  private eventPayload(
+    element: SVGPathElement,
+    event: PositionedEvent
+  ): GridInteractionPayload<PositionedEvent> {
+    return { element, data: event };
   }
 
   eventsAt(columnId: GridId, rowId: GridId): PositionedEvent[] {
@@ -338,7 +342,15 @@ class MainGrid {
       const column = this.columns[xIndex];
       const row = this.rows[yIndex];
       if (column && row) {
-        this.emit(EVENT_GRID_EVENTS.gridCrosshairMouseOver, this.cellPayload(column.id, row.id));
+        const payload: CrosshairInteractionPayload<PositionedEvent> = {
+          element: domEvent.target as SVGElement,
+          data: {
+            columnId: column.id,
+            rowId: row.id,
+            events: this.eventsAt(column.id, row.id)
+          }
+        };
+        this.emit(EVENT_GRID_EVENTS.gridCrosshairMouseOver, payload);
       }
     };
 

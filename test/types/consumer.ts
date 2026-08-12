@@ -43,22 +43,32 @@ const grid = new EventGrid<ProjectColumn, ProjectRow, ProjectEvent>({
 
 grid.addEventListener(EventGrid.eventNames.columnHistogramClick, (event) => {
   const payload = event.detail;
-  payload.item.owner.toUpperCase();
-  payload.type.toUpperCase();
+  payload.element.getBoundingClientRect();
+  payload.data.itemId.toString();
+  payload.data.type.toUpperCase();
 });
 
 grid.addEventListener(EventGrid.eventNames.rowHistogramMouseOver, (event) => {
   const payload = event.detail;
-  payload.item.priority.toFixed(0);
-  payload.count.toFixed(0);
+  payload.element.getBoundingClientRect();
+  payload.data.itemId.toString();
+  payload.data.count.toFixed(0);
 });
 
-const gridClickListener = (event: CustomEvent<EventGrid.Cell<ProjectColumn, ProjectRow, ProjectEvent>>) => {
+const gridClickListener = (event: CustomEvent<EventGrid.GridInteraction<ProjectEvent>>) => {
   const payload = event.detail;
-  payload.events[0].note?.toUpperCase();
+  payload.element.getBoundingClientRect();
+  payload.data.note?.toUpperCase();
 };
 grid.addEventListener(EventGrid.eventNames.gridClick, gridClickListener, { once: true });
 grid.removeEventListener(EventGrid.eventNames.gridClick, gridClickListener);
+
+grid.addEventListener(EventGrid.eventNames.columnTrackMouseOver, ({ detail }) => {
+  detail.element.getBoundingClientRect();
+  detail.data.itemId.toString();
+  detail.data.trackId.toString();
+  detail.data.value;
+});
 
 new EventGrid({
   // @ts-expect-error Only horizontal or vertical event stacking is supported.

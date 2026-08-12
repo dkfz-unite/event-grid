@@ -1,13 +1,12 @@
 # Emitted events
 
-Data events in `configuration.events` describe matrix observations. This page covers interaction and render events emitted by the component.
+Data events in `configuration.events` describe matrix observations. This page covers browser events emitted by EventGrid.
 
-EventGrid extends the browser's [`EventTarget`](https://developer.mozilla.org/docs/Web/API/EventTarget). Subscribe with `addEventListener()` and use constants from `EventGrid.eventNames`.
+EventGrid extends [`EventTarget`](https://developer.mozilla.org/docs/Web/API/EventTarget). Subscribe with `addEventListener()` and use names from `EventGrid.eventNames`.
 
 ```js
-const handleGridClick = (event) => {
-  const { column, row, events } = event.detail;
-  console.log(column, row, events);
+const handleGridClick = ({ detail: { element, data } }) => {
+  console.log(element, data);
 };
 
 grid.addEventListener(EventGrid.eventNames.gridClick, handleGridClick);
@@ -16,49 +15,46 @@ grid.removeEventListener(EventGrid.eventNames.gridClick, handleGridClick);
 
 Keep the function reference when a listener must later be removed.
 
-## The handler event
+## Handler structure
 
 Handlers receive a native `CustomEvent`.
 
 | Property | Meaning |
 | --- | --- |
 | `event.type` | Emitted event name |
-| `event.detail` | EventGrid payload documented below |
-| `event.target` | The EventGrid instance |
-| `event.currentTarget` | The EventGrid instance while the listener runs |
+| `event.detail` | Payload documented below |
+| `event.target` | EventGrid instance |
+| `event.currentTarget` | EventGrid instance while the listener runs |
 
-`event.target` is not the SVG element that was clicked or hovered because EventGrid dispatches the `CustomEvent` from its own instance.
+Click and mouse-over payloads use one structure:
 
-### Using a rendered element for a tooltip
+```ts
+interface Interaction<TData, TElement extends Element = Element> {
+  element: TElement;
+  data: TData;
+}
+```
 
-Use the emitted event for data and a delegated DOM listener on the host when the tooltip also needs the actual rendered element or pointer coordinates:
+`detail.element` is the actual SVG path or rectangle that caused the interaction. `event.target` remains the EventGrid instance because it dispatches the `CustomEvent`.
+
+### Tooltip example
 
 ```js
-const host = document.querySelector('#grid');
-
-host.addEventListener('pointermove', (event) => {
-  if (!(event.target instanceof Element)) return;
-
-  const element = event.target.closest(
-    '.eg-event, .eg-summary-bar, .eg-track-data'
-  );
-  if (!element || !host.contains(element)) return;
-
+grid.addEventListener(EventGrid.eventNames.gridMouseOver, ({ detail }) => {
+  const { element, data } = detail;
   const bounds = element.getBoundingClientRect();
+
+  tooltip.textContent = `${data.type}: ${data.id}`;
   tooltip.style.left = `${bounds.right + 8}px`;
   tooltip.style.top = `${bounds.top}px`;
 });
-
-grid.addEventListener(EventGrid.eventNames.gridMouseOver, ({ detail }) => {
-  tooltip.textContent = `${detail.row.label} / ${detail.column.label}`;
-});
 ```
 
-Grid event elements also expose `data-column-id`, `data-row-id`, and `data-event-type` attributes. Histogram segments expose the corresponding axis identifier, event type, and count. Track cells expose `data-track-id`.
+No separate listener on the grid's host element is required.
 
 ## Listener options
 
-Native listener options work unchanged. `{ once: true }` asks the browser to remove the listener automatically after its first call:
+Native listener options work unchanged. `{ once: true }` removes the listener automatically after its first call:
 
 ```js
 grid.addEventListener(
@@ -68,78 +64,67 @@ grid.addEventListener(
 );
 ```
 
-Other standard options accepted by `EventTarget` may also be passed.
+## Grid events
 
-## Grid and crosshair events
-
-| Constant | Detail |
+| Constant | `detail` |
 | --- | --- |
-| `EventGrid.eventNames.gridClick` | cell payload |
-| `EventGrid.eventNames.gridMouseOver` | cell payload |
-| `EventGrid.eventNames.gridMouseOut` | `undefined` |
-| `EventGrid.eventNames.gridCrosshairMouseOver` | cell payload |
-| `EventGrid.eventNames.gridCrosshairMouseOut` | `undefined` |
+| `gridClick`, `gridMouseOver` | `{ element: SVGPathElement, data: event }` |
+| `gridMouseOut` | `undefined` |
 
-A cell payload is:
+`data` is the exact data event represented by the path, including `id`, `columnId`, `rowId`, `type`, and custom fields. Each stacked segment emits its own event data. Empty cells do not emit these events.
 
-```ts
-interface CellPayload<TColumn, TRow, TEvent> {
-  columnId: string | number;
-  rowId: string | number;
-  column: TColumn;
-  row: TRow;
-  events: TEvent[];
-}
+```js
+grid.addEventListener(EventGrid.eventNames.gridClick, ({ detail }) => {
+  console.log(detail.data.columnId, detail.data.rowId, detail.data.type);
+});
 ```
 
-`events` contains every data event in the cell.
+## Crosshair events
 
-`gridClick` and `gridMouseOver` originate from rendered event segments, so empty cells do not emit them. When crosshair mode is active, `gridCrosshairMouseOver` reports every cell under the pointer, including empty cells whose `events` array is empty; regular `gridMouseOver` is suppressed.
+| Constant | `detail` |
+| --- | --- |
+| `gridCrosshairMouseOver` | `{ element: SVGElement, data: { columnId, rowId, events } }` |
+| `gridCrosshairMouseOut` | `undefined` |
+
+Crosshair mode covers empty cells, so its compact cell data contains an `events` array. `element` is the SVG element currently under the pointer. Regular `gridMouseOver` is suppressed while crosshair mode is active.
 
 ## Histogram events
 
-Click and mouse-over events on the same axis share a payload.
-
-| Constants | Detail |
+| Constants | `detail` |
 | --- | --- |
-| `columnHistogramClick`, `columnHistogramMouseOver` | `{ axis: 'column', item, type, count }` |
+| `columnHistogramClick`, `columnHistogramMouseOver` | `{ element, data: { axis: 'column', itemId, type, count } }` |
 | `columnHistogramMouseOut` | `{ axis: 'column' }` |
-| `rowHistogramClick`, `rowHistogramMouseOver` | `{ axis: 'row', item, rowId, type, count }` |
+| `rowHistogramClick`, `rowHistogramMouseOver` | `{ element, data: { axis: 'row', itemId, type, count } }` |
 | `rowHistogramMouseOut` | `{ axis: 'row' }` |
 
-Access these names through `EventGrid.eventNames`, for example:
+`element` is the colored `SVGRectElement`. `itemId` identifies its column or row, `type` identifies the event-type segment, and `count` is that segment's event count.
 
 ```js
-grid.addEventListener(
-  EventGrid.eventNames.columnHistogramClick,
-  ({ detail }) => {
-    console.log(detail.item, detail.type, detail.count);
-  }
-);
+grid.addEventListener(EventGrid.eventNames.columnHistogramClick, ({ detail }) => {
+  console.log(detail.element, detail.data.itemId, detail.data.type, detail.data.count);
+});
 ```
-
-`item` is the full column or row object. `type` is the colored event-type segment, and `count` is that segment's event count.
 
 ## Track events
 
-| Constants | Detail |
+| Constants | `detail` |
 | --- | --- |
-| `columnTrackClick`, `columnTrackMouseOver` | `{ axis: 'column', item }` |
+| `columnTrackClick`, `columnTrackMouseOver` | `{ element, data: { axis: 'column', itemId, trackId, value } }` |
 | `columnTrackMouseOut` | `{ axis: 'column' }` |
-| `rowTrackClick`, `rowTrackMouseOver` | `{ axis: 'row', item }` |
+| `rowTrackClick`, `rowTrackMouseOver` | `{ element, data: { axis: 'row', itemId, trackId, value } }` |
 | `rowTrackMouseOut` | `{ axis: 'row' }` |
 
-The track `item` contains the row or column `id` and `label`, plus `value`, `valueLabel`, `trackId`, `trackLabel`, `field`, and optional `type`. See [Track colors and opacity](data.md#track-colors-and-opacity) for field meanings.
+`element` is the track cell's `SVGRectElement`. `itemId` identifies its column or row, `trackId` identifies the track, and `value` is the raw field value.
 
 ```js
 grid.addEventListener(EventGrid.eventNames.rowTrackMouseOver, ({ detail }) => {
-  console.log(detail.axis, detail.item.trackLabel, detail.item.valueLabel);
+  console.log(detail.element, detail.data.trackId, detail.data.value);
 });
 ```
 
 ## Render lifecycle events
 
-Lifecycle events have `undefined` detail. Each `render()` call emits these start/end pairs.
+Lifecycle events have `undefined` detail. Each `render()` call emits these pairs.
 
 | Scope | Start constant | End constant |
 | --- | --- | --- |
@@ -150,33 +135,28 @@ Lifecycle events have `undefined` detail. Each `render()` call emits these start
 | Column tracks | `renderColumnTrackStart` | `renderColumnTrackEnd` |
 | Row tracks | `renderRowTrackStart` | `renderRowTrackEnd` |
 
-Use the constants through `EventGrid.eventNames`:
-
 ```js
 grid.addEventListener(EventGrid.eventNames.renderAllEnd, () => {
   console.log('EventGrid render complete');
 });
-
-grid.render();
 ```
 
 ## TypeScript handlers
 
-The selected event-name constant determines the type of `event.detail`:
+The selected event-name constant determines `event.detail` automatically:
 
 ```ts
 grid.addEventListener(EventGrid.eventNames.gridClick, ({ detail }) => {
-  detail.column;
-  detail.row;
-  detail.events;
+  detail.element.getBoundingClientRect();
+  detail.data.type;
 });
 
-const listener = (event: CustomEvent<EventGrid.Cell>) => {
-  console.log(event.detail.events);
+const listener = (event: CustomEvent<EventGrid.GridInteraction<MyEvent>>) => {
+  console.log(event.detail.data);
 };
 
 grid.addEventListener(EventGrid.eventNames.gridClick, listener);
 grid.removeEventListener(EventGrid.eventNames.gridClick, listener);
 ```
 
-Generic column, row, and data-event types flow into these payloads as shown in [Data: TypeScript](data.md#typescript).
+See [Data: TypeScript](data.md#typescript) for custom data types.
