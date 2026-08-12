@@ -131,7 +131,7 @@ class TrackGroup {
           fill: DEFAULT_TRACK_FILL,
           opacity: 1,
           trackId: track.id,
-          trackLabel: track.label,
+          trackLabel: typeof track.label === 'undefined' ? String(track.id) : track.label,
           field: track.field,
           type: track.type
         });
@@ -286,12 +286,11 @@ class TrackGroup {
         this.domain.sort(comparator);
         this.updateCallback(this.rotated);
       })
-      .transition()
       .attr('x', -6)
       .attr('y', this.cellHeight / 2)
       .attr('dy', '.32em')
       .attr('text-anchor', 'end')
-      .text((track: InternalTrack) => track.label);
+      .text((track: InternalTrack) => typeof track.label === 'undefined' ? track.id : track.label);
   }
 
   private defaultComparator(
@@ -362,11 +361,10 @@ class TrackGroup {
       .on('click', (domEvent: MouseEvent) => this.emitTrackInteraction(domEvent, 'Click'))
       .on('mouseover', (domEvent: MouseEvent) => this.emitTrackInteraction(domEvent, 'MouseOver'))
       .on('mouseout', () => {
-        const axis = this.rotated ? 'row' : 'column';
-        const axisEvent = axis === 'column'
-          ? EVENT_GRID_EVENTS.columnTrackMouseOut
-          : EVENT_GRID_EVENTS.rowTrackMouseOut;
-        this.emit(axisEvent, { axis });
+        const axisEvent = this.rotated
+          ? EVENT_GRID_EVENTS.rowTrackMouseOut
+          : EVENT_GRID_EVENTS.columnTrackMouseOut;
+        this.emit(axisEvent);
       });
   }
 
@@ -375,20 +373,35 @@ class TrackGroup {
     const index = target.dataset && target.dataset.trackDataIndex;
     const item = typeof index === 'undefined' ? undefined : this.trackData[Number(index)];
     if (!item) return;
-    const axis = this.rotated ? 'row' : 'column';
-    const payload: TrackInteractionPayload<typeof axis> = {
+    if (this.rotated) {
+      const payload: TrackInteractionPayload<'row'> = {
+        element: target,
+        data: {
+          rowId: item.id,
+          id: item.trackId,
+          label: item.trackLabel,
+          value: item.value
+        }
+      };
+      const eventName = suffix === 'Click'
+        ? EVENT_GRID_EVENTS.rowTrackClick
+        : EVENT_GRID_EVENTS.rowTrackMouseOver;
+      this.emit(eventName, payload);
+      return;
+    }
+    const payload: TrackInteractionPayload<'column'> = {
       element: target,
       data: {
-        axis,
-        itemId: item.id,
-        trackId: item.trackId,
+        columnId: item.id,
+        id: item.trackId,
+        label: item.trackLabel,
         value: item.value
       }
     };
-    const axisEvent = axis === 'column'
-      ? suffix === 'Click' ? EVENT_GRID_EVENTS.columnTrackClick : EVENT_GRID_EVENTS.columnTrackMouseOver
-      : suffix === 'Click' ? EVENT_GRID_EVENTS.rowTrackClick : EVENT_GRID_EVENTS.rowTrackMouseOver;
-    this.emit(axisEvent, payload);
+    const eventName = suffix === 'Click'
+      ? EVENT_GRID_EVENTS.columnTrackClick
+      : EVENT_GRID_EVENTS.columnTrackMouseOver;
+    this.emit(eventName, payload);
   }
 
   private itemPosition(item: PositionedColumn | PositionedRow): number {

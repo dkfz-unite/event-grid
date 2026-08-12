@@ -71,7 +71,7 @@ grid.addEventListener(
 | `gridClick`, `gridMouseOver` | `{ element: SVGPathElement, data: event }` |
 | `gridMouseOut` | `undefined` |
 
-`data` is the exact data event represented by the path, including `id`, `columnId`, `rowId`, `type`, and custom fields. Each stacked segment emits its own event data. Empty cells do not emit these events.
+`data` is the exact data event represented by the path, including `id`, `columnId`, `rowId`, `type`, optional `label`, and custom fields. Each stacked segment emits its own event data. Empty cells do not emit these events.
 
 ```js
 grid.addEventListener(EventGrid.eventNames.gridClick, ({ detail }) => {
@@ -92,16 +92,16 @@ Crosshair mode covers empty cells, so its compact cell data contains an `events`
 
 | Constants | `detail` |
 | --- | --- |
-| `columnHistogramClick`, `columnHistogramMouseOver` | `{ element, data: { axis: 'column', itemId, type, count } }` |
-| `columnHistogramMouseOut` | `{ axis: 'column' }` |
-| `rowHistogramClick`, `rowHistogramMouseOver` | `{ element, data: { axis: 'row', itemId, type, count } }` |
-| `rowHistogramMouseOut` | `{ axis: 'row' }` |
+| `columnHistogramClick`, `columnHistogramMouseOver` | `{ element, data: { columnId, type, label, count } }` |
+| `columnHistogramMouseOut` | `undefined` |
+| `rowHistogramClick`, `rowHistogramMouseOver` | `{ element, data: { rowId, type, label, count } }` |
+| `rowHistogramMouseOut` | `undefined` |
 
-`element` is the colored `SVGRectElement`. `itemId` identifies its column or row, `type` identifies the event-type segment, and `count` is that segment's event count.
+`element` is the colored `SVGRectElement`. `columnId` or `rowId` identifies the corresponding item, `type` identifies the event-type segment, `label` is its readable name, and `count` is that segment's event count.
 
 ```js
 grid.addEventListener(EventGrid.eventNames.columnHistogramClick, ({ detail }) => {
-  console.log(detail.element, detail.data.itemId, detail.data.type, detail.data.count);
+  console.log(detail.element, detail.data.columnId, detail.data.type, detail.data.count);
 });
 ```
 
@@ -109,16 +109,16 @@ grid.addEventListener(EventGrid.eventNames.columnHistogramClick, ({ detail }) =>
 
 | Constants | `detail` |
 | --- | --- |
-| `columnTrackClick`, `columnTrackMouseOver` | `{ element, data: { axis: 'column', itemId, trackId, value } }` |
-| `columnTrackMouseOut` | `{ axis: 'column' }` |
-| `rowTrackClick`, `rowTrackMouseOver` | `{ element, data: { axis: 'row', itemId, trackId, value } }` |
-| `rowTrackMouseOut` | `{ axis: 'row' }` |
+| `columnTrackClick`, `columnTrackMouseOver` | `{ element, data: { columnId, id, label, value } }` |
+| `columnTrackMouseOut` | `undefined` |
+| `rowTrackClick`, `rowTrackMouseOver` | `{ element, data: { rowId, id, label, value } }` |
+| `rowTrackMouseOut` | `undefined` |
 
-`element` is the track cell's `SVGRectElement`. `itemId` identifies its column or row, `trackId` identifies the track, and `value` is the raw field value.
+`element` is the track cell's `SVGRectElement`. `columnId` or `rowId` identifies the corresponding item. `id` and `label` identify the track; `label` falls back to the string form of `id`. `value` is the raw field value.
 
 ```js
 grid.addEventListener(EventGrid.eventNames.rowTrackMouseOver, ({ detail }) => {
-  console.log(detail.element, detail.data.trackId, detail.data.value);
+  console.log(detail.element, detail.data.rowId, detail.data.label, detail.data.value);
 });
 ```
 

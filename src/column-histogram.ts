@@ -8,6 +8,7 @@ import {
   idKey
 } from './internal-types';
 import { EVENT_GRID_EVENTS } from './event-names';
+import { eventTypeLabel } from './event-types';
 import { HistogramInteractionPayload } from './types';
 
 function getColumnEventStats(
@@ -102,7 +103,7 @@ class ColumnHistogram {
         this.emit(EVENT_GRID_EVENTS.columnHistogramMouseOver, payload);
       })
       .on('mouseout', () => {
-        this.emit(EVENT_GRID_EVENTS.columnHistogramMouseOut, { axis: 'column' });
+        this.emit(EVENT_GRID_EVENTS.columnHistogramMouseOut);
       })
       .on('click', (domEvent: MouseEvent) => {
         const target = domEvent.target as SVGRectElement;
@@ -117,9 +118,9 @@ class ColumnHistogram {
     return {
       element: target,
       data: {
-        axis: 'column',
-        itemId: this.items[index].id,
+        columnId: this.items[index].id,
         type: target.dataset.eventType || '',
+        label: target.dataset.eventLabel || target.dataset.eventType || '',
         count: Number(target.dataset.count)
       }
     };
@@ -141,6 +142,7 @@ class ColumnHistogram {
           .attr('data-item-index', index)
           .attr('data-column-id', stat.column.id)
           .attr('data-event-type', type)
+          .attr('data-event-label', eventTypeLabel(this.events, type))
           .attr('data-count', count)
           .attr('width', Math.max(0, this.barWidth - (this.barWidth < 3 ? 0 : 1)))
           .attr('height', barHeight)

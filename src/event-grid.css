@@ -47,6 +47,14 @@
     user-select: none;
 }
 
+.eg-legend-swatch {
+    shape-rendering: crispEdges;
+}
+
+.eg-legend-label {
+    dominant-baseline: auto;
+}
+
 .eg-label-text-font {
     font-size: 0.55rem;
 }

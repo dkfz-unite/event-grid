@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import ColumnHistogram from './column-histogram';
 import RowHistogram from './row-histogram';
 import Track from './track';
+import EventLegend from './event-legend';
 import { EVENT_GRID_EVENTS } from './event-names';
 import {
   CrosshairInteractionPayload,
@@ -73,6 +74,7 @@ class MainGrid {
   columnTrack: Track;
   rowHistogram: RowHistogram;
   rowTrack: Track;
+  eventLegend: EventLegend;
 
   constructor(
     params: InternalOptions,
@@ -134,6 +136,13 @@ class MainGrid {
       this.width + this.rowHistogram.totalWidth
     );
     this.rowTrack.init();
+    this.eventLegend = new EventLegend(
+      params,
+      this.container,
+      this.events,
+      this.rightContentOffset(),
+      this.cellHeight
+    );
   }
 
   private initSvg(): void {
@@ -173,6 +182,7 @@ class MainGrid {
     this.emit(EVENT_GRID_EVENTS.renderRowTrackStart);
     this.rowTrack.render();
     this.emit(EVENT_GRID_EVENTS.renderRowTrackEnd);
+    this.eventLegend.render();
     this.defineCrosshairBehaviour();
     this.resizeSvg();
   }
@@ -223,6 +233,7 @@ class MainGrid {
       .attr('data-column-id', (event: PositionedEvent) => event.columnId)
       .attr('data-row-id', (event: PositionedEvent) => event.rowId)
       .attr('data-event-type', (event: PositionedEvent) => event.type)
+      .attr('data-event-label', (event: PositionedEvent) => event.label || event.type)
       .attr('data-event-stacking', this.eventStacking)
       .attr('data-cell-event-index', (event: PositionedEvent) =>
         this.eventsAt(event.columnId, event.rowId).indexOf(event))
@@ -250,6 +261,7 @@ class MainGrid {
     this.rowTrack.update(this.rows);
     this.rowHistogram.events = this.events;
     this.rowHistogram.update(this.rows);
+    this.eventLegend.update(this.events, this.rightContentOffset(), this.cellHeight);
   }
 
   computeCoordinates(): void {
@@ -305,6 +317,7 @@ class MainGrid {
     this.columnTrack.resize(this.width, this.height, this.height);
     this.rowHistogram.resize(this.width, this.height, this.width);
     this.rowTrack.resize(this.width, this.height, this.width + this.rowHistogram.totalWidth);
+    this.eventLegend.update(this.events, this.rightContentOffset(), this.cellHeight);
     this.renderEvents();
     this.resizeSvg();
     if (this.verticalCross) {
@@ -315,9 +328,9 @@ class MainGrid {
 
   resizeSvg(): void {
     const totalWidth = this.margin.left + this.leftTextWidth + this.width +
-      this.rowHistogram.totalWidth + this.rowTrack.height + this.margin.right;
-    const totalHeight = this.margin.top + this.histogramHeightColumns + this.height +
-      this.columnTrack.height + this.margin.bottom;
+      this.rowHistogram.totalWidth + this.rowTrack.height + this.eventLegend.width + this.margin.right;
+    const contentHeight = Math.max(this.height + this.columnTrack.height, this.eventLegend.height);
+    const totalHeight = this.margin.top + this.histogramHeightColumns + contentHeight + this.margin.bottom;
     this.canvas.attr('width', totalWidth).attr('height', totalHeight);
     if (this.scaleToFit) {
       this.canvas.style('width', '100%');
@@ -328,6 +341,10 @@ class MainGrid {
     }
     this.container.attr('transform',
       `translate(${this.margin.left + this.leftTextWidth},${this.margin.top + this.histogramHeightColumns})`);
+  }
+
+  private rightContentOffset(): number {
+    return this.width + this.rowHistogram.totalWidth + this.rowTrack.height;
   }
 
   private defineCrosshairBehaviour(): void {

@@ -8,6 +8,7 @@ import {
   idKey
 } from './internal-types';
 import { EVENT_GRID_EVENTS } from './event-names';
+import { eventTypeLabel } from './event-types';
 import { HistogramInteractionPayload } from './types';
 
 function getRowEventStats(
@@ -57,7 +58,6 @@ class RowHistogram {
   chart: D3Selection;
   leftAxis: D3Selection;
   topAxis: D3Selection;
-  zeroText: D3Selection;
   topText: D3Selection;
   middleText: D3Selection;
   topLabel: D3Selection;
@@ -104,7 +104,7 @@ class RowHistogram {
         this.emit(EVENT_GRID_EVENTS.rowHistogramMouseOver, this.payloadFor(target));
       })
       .on('mouseout', () => {
-        this.emit(EVENT_GRID_EVENTS.rowHistogramMouseOut, { axis: 'row' });
+        this.emit(EVENT_GRID_EVENTS.rowHistogramMouseOut);
       })
       .on('click', (domEvent: MouseEvent) => {
         const target = domEvent.target as SVGRectElement;
@@ -119,9 +119,9 @@ class RowHistogram {
     return {
       element: target,
       data: {
-        axis: 'row',
-        itemId: row ? row.id : rowId,
+        rowId: row ? row.id : rowId,
         type: target.dataset.eventType || '',
+        label: target.dataset.eventLabel || target.dataset.eventType || '',
         count: Number(target.dataset.count)
       }
     };
@@ -149,6 +149,7 @@ class RowHistogram {
           .attr('fill', this.colorMap[type] || '#ccc')
           .attr('data-row-id', stat.row.id)
           .attr('data-event-type', type)
+          .attr('data-event-label', eventTypeLabel(this.events, type))
           .attr('data-count', count);
         xOffset += barWidth;
       });
@@ -159,16 +160,12 @@ class RowHistogram {
   private renderAxis(): void {
     this.leftAxis = this.chart.append('line').attr('class', `${this.prefix}histogram-axis`);
     this.topAxis = this.chart.append('line').attr('class', `${this.prefix}histogram-axis`);
-    this.zeroText = this.chart.append('text')
-      .attr('class', `${this.prefix}label-text-font`)
-      .attr('dy', '.32em')
-      .attr('text-anchor', 'start');
     this.topText = this.chart.append('text')
-      .attr('class', `${this.prefix}label-text-font`)
+      .attr('class', `${this.prefix}histogram-tick ${this.prefix}label-text-font`)
       .attr('dy', '.32em')
       .attr('text-anchor', 'start');
     this.middleText = this.chart.append('text')
-      .attr('class', `${this.prefix}label-text-font`)
+      .attr('class', `${this.prefix}histogram-tick ${this.prefix}label-text-font`)
       .attr('dy', '.32em')
       .attr('text-anchor', 'middle');
     this.topLabel = this.chart.append('text')
@@ -189,10 +186,17 @@ class RowHistogram {
       .attr('x2', this.histogramWidth + this.lineHeightOffset)
       .attr('y1', -this.lineHeightOffset)
       .attr('y2', -this.lineHeightOffset);
-    this.zeroText.attr('x', 0).attr('y', -8).text(0);
-    this.topText.attr('x', this.histogramWidth).attr('y', -8).attr('text-anchor', 'end').text(this.topCount);
+    const tickY = -this.lineHeightOffset - 6;
+    this.topText
+      .attr('x', this.histogramWidth)
+      .attr('y', tickY)
+      .attr('text-anchor', 'end')
+      .text(this.topCount);
     const half = Math.floor(this.topCount / 2);
-    this.middleText.attr('x', this.histogramWidth * half / this.topCount).attr('y', -8).text(half);
+    this.middleText
+      .attr('x', this.histogramWidth * half / this.topCount)
+      .attr('y', tickY)
+      .text(half || '');
     this.topLabel.attr('x', this.histogramWidth / 2).attr('y', -20);
   }
 

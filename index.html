@@ -15,8 +15,6 @@
         button { border: 1px solid #bcccdc; border-radius: 6px; background: #fff; padding: 7px 11px; cursor: pointer; }
         button:hover { background: #f0f4f8; }
         #stats { margin: 0 0 10px; font-size: 0.9rem; color: #52606d; }
-        .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; font-size: 0.85rem; }
-        .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; background: var(--color); }
         #grid { width: 100%; overflow: hidden; }
         #details { margin: 14px 0 0; min-height: 54px; padding: 10px; border-radius: 6px; background: #f5f7fa; white-space: pre-wrap; font: 0.78rem/1.45 ui-monospace, monospace; }
     </style>
@@ -35,7 +33,6 @@
             <button id="reset" type="button">Reset</button>
         </div>
         <p id="stats"></p>
-        <div id="legend" class="legend"></div>
         <div id="grid"></div>
         <pre id="details">Hover over or click an event cell to inspect its generic payload.</pre>
     </section>

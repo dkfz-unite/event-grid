@@ -18,7 +18,7 @@ interface ProjectEvent extends EventGrid.Event {
 const grid = new EventGrid<ProjectColumn, ProjectRow, ProjectEvent>({
   columns: [{ id: 'c1', owner: 'Avery', metadata: { customField: 4 } }],
   rows: [{ id: 'r1', priority: 1 }],
-  events: [{ id: 'e1', columnId: 'c1', rowId: 'r1', type: 'active', note: 'Typed metadata' }],
+  events: [{ id: 'e1', columnId: 'c1', rowId: 'r1', type: 'active', label: 'In progress', note: 'Typed metadata' }],
   columnTracks: [
     {
       id: 'owner',
@@ -44,14 +44,15 @@ const grid = new EventGrid<ProjectColumn, ProjectRow, ProjectEvent>({
 grid.addEventListener(EventGrid.eventNames.columnHistogramClick, (event) => {
   const payload = event.detail;
   payload.element.getBoundingClientRect();
-  payload.data.itemId.toString();
+  payload.data.columnId.toString();
   payload.data.type.toUpperCase();
+  payload.data.label.toUpperCase();
 });
 
 grid.addEventListener(EventGrid.eventNames.rowHistogramMouseOver, (event) => {
   const payload = event.detail;
   payload.element.getBoundingClientRect();
-  payload.data.itemId.toString();
+  payload.data.rowId.toString();
   payload.data.count.toFixed(0);
 });
 
@@ -65,8 +66,9 @@ grid.removeEventListener(EventGrid.eventNames.gridClick, gridClickListener);
 
 grid.addEventListener(EventGrid.eventNames.columnTrackMouseOver, ({ detail }) => {
   detail.element.getBoundingClientRect();
-  detail.data.itemId.toString();
-  detail.data.trackId.toString();
+  detail.data.columnId.toString();
+  detail.data.id.toString();
+  detail.data.label.toUpperCase();
   detail.data.value;
 });
 

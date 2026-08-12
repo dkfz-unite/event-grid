@@ -146,15 +146,42 @@ describe('Tracks', function () {
     dispatch(rowCell, 'click');
 
     expect(columnHover.element).to.equal(columnCell);
-    expect(columnHover.data.axis).to.equal('column');
-    expect(columnClick.data.itemId).to.equal('c1');
-    expect(columnClick.data.trackId).to.equal('owner');
-    expect(columnClick.data.value).to.equal('Avery');
+    expect(columnHover.data).to.deep.equal({
+      columnId: 'c1', id: 'owner', label: 'Owner', value: 'Avery'
+    });
+    expect(columnClick.data).to.deep.equal({
+      columnId: 'c1', id: 'owner', label: 'Owner', value: 'Avery'
+    });
     expect(rowHover.element).to.equal(rowCell);
-    expect(rowHover.data.axis).to.equal('row');
-    expect(rowClick.data.itemId).to.equal('r1');
-    expect(rowClick.data.trackId).to.equal('priority');
-    expect(rowClick.data.value).to.equal(2);
+    expect(rowHover.data).to.deep.equal({
+      rowId: 'r1', id: 'priority', label: 'Priority', value: 2
+    });
+    expect(rowClick.data).to.deep.equal({
+      rowId: 'r1', id: 'priority', label: 'Priority', value: 2
+    });
+    grid.destroy();
+  });
+
+  it('uses the track id as its label when label is omitted', function () {
+    var grid = new EventGrid({
+      element: '#test6',
+      columns: [{ id: 'c1', owner: 'Avery' }],
+      rows: [],
+      events: [],
+      columnTracks: [{ id: 'owner', field: 'owner' }]
+    });
+    var detail;
+    grid.addEventListener(EventGrid.eventNames.columnTrackMouseOver, function (event) {
+      detail = event.detail;
+    });
+    grid.render();
+
+    var trackLabel = document.querySelector('#test6 .eg-track-label');
+    var trackCell = document.querySelector('#test6 .eg-track-data');
+    dispatch(trackCell, 'mouseover');
+
+    expect(trackLabel.textContent).to.equal('owner');
+    expect(detail.data.label).to.equal('owner');
     grid.destroy();
   });
 

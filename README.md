@@ -1,6 +1,6 @@
 # EventGrid
 
-EventGrid is a standalone matrix visualization for columns, rows, and typed events. It supports multiple events per cell, colored frequency histograms, metadata tracks, heat maps, grid lines, crosshairs, and frequency-based ordering.
+EventGrid is a standalone matrix visualization for columns, rows, and typed events. It supports multiple events per cell, colored frequency histograms, an event legend, metadata tracks, heat maps, grid lines, crosshairs, and frequency-based ordering.
 
 ![EventGrid playground](docs/images/event-grid-playground.png)
 

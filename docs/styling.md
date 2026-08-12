@@ -8,7 +8,7 @@ import '@dkfz-unite/event-grid/style.css';
 import './event-grid-overrides.css';
 ```
 
-The package stylesheet provides usable defaults for the matrix, histograms, tracks, labels, crosshairs, and hover states. Override only the parts required by the application.
+The package stylesheet provides usable defaults for the matrix, histograms, legend, tracks, labels, crosshairs, and hover states. Override only the parts required by the application.
 
 ## Scoped overrides
 
@@ -49,6 +49,8 @@ Load overrides after `style.css` so rules with equal specificity take precedence
 | `.eg-track-group-label`, `.eg-track-label` | Track-group and track labels |
 | `.eg-event` | Cell event segments |
 | `.eg-summary-bar` | Histogram segments |
+| `.eg-event-legend` | Event legend container |
+| `.eg-legend-item`, `.eg-legend-swatch`, `.eg-legend-label` | Legend entries, color squares, and labels |
 | `.eg-track-data` | Track cells |
 | `.eg-vertical-cross`, `.eg-horizontal-cross` | Crosshair lines |
 
@@ -63,6 +65,7 @@ Each cell segment also receives an event-type class. Characters other than lette
 ```
 
 Prefer `configuration.colorPalette` and `configuration.colorMap` for fill colors because those settings keep grid cells and both histograms synchronized. See [Event colors and summaries](data.md#event-colors-and-summaries).
+The built-in legend uses the same resolved colors automatically.
 
 ## Track selectors
 
